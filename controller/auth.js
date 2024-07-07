@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../model/user');
 
-const { JWT_SECRET } = process.env;
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const register = async (req, res) => {
     try {
@@ -22,7 +22,7 @@ const register = async (req, res) => {
   
       await newUser.save();
   
-      res.status(201).send('user registered successfully');
+      res.status(201).send({'user registered successfully': newUser});
     } catch (error) {
       console.error(error);
       res.status(500).send('error registering user');
@@ -51,4 +51,14 @@ const login = async (req, res) => {
     }
 };
 
-module.exports = {register, login};
+const get = async (req, res) => {
+  try {
+    const getall = await User.find();
+    res.json(getall);
+  } catch (error) {
+    console.error('error fetching users:', error);
+    res.status(500).json({ error: 'internal server error' });
+  }
+};
+
+module.exports = {register, login, get};
