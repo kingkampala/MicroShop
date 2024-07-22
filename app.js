@@ -3,15 +3,14 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 const app = express();
 
-//const authRoutes = require('./routes/auth');
 const userRoute = require('./routes/user');
+const productRoute = require('./routes/product');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 
-
-//app.use('/auth', authRoutes);
 app.use(`/user`, userRoute);
+app.use(`/product`, productRoute);
 
 const port = process.env.PORT;
 const DB_URL = process.env.MONGO_URL

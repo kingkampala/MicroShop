@@ -1,14 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const authenticateToken = require('../middleware/auth');
-const {get, getId, post} = require('../controller/product');
+const {get, getId, upload, update, remove} = require('../controller/product');
 
-router.post('/upload', post);
+router.post('/', authenticateToken, upload);
 
 router.get('/', get);
 
-router.get('/profile', authenticateToken, (req, res) => {
-    res.json(req.user);
-});
+router.get('/:id', getId);
+
+router.put('/:id', authenticateToken, update);
+
+router.delete('/:id', authenticateToken, remove);
 
 module.exports = router;
