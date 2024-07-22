@@ -51,14 +51,77 @@ const login = async (req, res) => {
     }
 };
 
+const update = async (req, res) => {
+  try {
+      const { username, newPassword } = req.body;
+      const userId = req.params.id;
+
+      if (!userId || !username || !newPassword) {
+          return res.status(400).send('user ID, username, and new password are required');
+      }
+
+      const user = await User.findById(userId);
+
+      if (!user) {
+          return res.status(404).send('user not found');
+      }
+
+      user.username = username;
+      user.password = await bcrypt.hash(newPassword, 10);
+
+      await user.save();
+
+      res.status(200).send({'user updated successfully': user});
+  } catch (error) {
+      console.error(error);
+      res.status(500).send('error updating user');
+  }
+};
+
+const remove = async (req, res) => {
+  try {
+      const userId = req.params.id;
+
+      if (!userId) {
+          return res.status(400).send('user ID is required');
+      }
+
+      const user = await User.findByIdAndDelete(userId);
+
+      if (!user) {
+          return res.status(404).send('user not found');
+      }
+
+      res.status(200).send('user deleted successfully');
+  } catch (error) {
+      console.error(error);
+      res.status(500).send('error deleting user');
+  }
+};
+
 const get = async (req, res) => {
   try {
-    const getall = await User.find();
-    res.json(getall);
+    const users = await User.find();
+    res.json(users);
   } catch (error) {
     console.error('error fetching users:', error);
     res.status(500).json({ error: 'internal server error' });
   }
 };
 
-module.exports = {register, login, get};
+const getId = async (req, res) => {
+  try {
+    const userId = req.params.id
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).send('user not found');
+    }
+    res.json(user);
+  } catch (error) {
+    console.error('error fetching users:', error);
+    res.status(500).json({ error: 'internal server error' });
+  }
+};
+
+module.exports = {register, login, update, remove, get, getId};
