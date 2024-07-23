@@ -12,7 +12,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(`/user`, userRoute);
 app.use(`/product`, productRoute);
 
-const port = process.env.PORT;
+const port = process.env.PORT || 2810;
 const DB_URL = process.env.MONGO_URL
 
 mongoose

@@ -6,7 +6,7 @@ function authenticateToken(req, res, next) {
   const token = authHeader && authHeader.split(' ')[1];
   
   if (!token) {
-    return res.sendStatus(401);
+    return res.status(401).send('access denied. no token provided.');
   }
   
   jwt.verify(token, JWT_SECRET, (err, user) => {

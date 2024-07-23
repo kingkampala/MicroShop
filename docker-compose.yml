@@ -1,15 +1,30 @@
 version: '3.8'
 
 services:
-  mongo:
-    image: mongo
+  app:
+    build: .
+    container_name: node-app
+    ports:
+      - "2810:2810"
+    environment:
+      - NODE_ENV=development
+      - PORT=2810
+      - MONGO_URL=${MONGO_URL}
+      - JWT_SECRET=${JWT_SECRET}
+    volumes:
+      - .:/usr/src/app
+    command: "npm start"
+
+  mongodb:
+    image: mongo:latest
     container_name: mongo
     ports:
       - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - mongo-data:/data/db
 
-  auth-service:
-    build: ./auth-service
-    ports:
-      - "2810:2810"
-    depends_on:
-      - mongo
+volumes:
+  mongo-data:
