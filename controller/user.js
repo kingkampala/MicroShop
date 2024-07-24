@@ -42,6 +42,13 @@ const login = async (req, res) => {
       if (!user || !(await bcrypt.compare(password, user.password))) {
         return res.status(401).send('invalid username or password');
       }
+
+      const isMatch = await bcrypt.compare(password, user.password);
+
+      if (!isMatch) {
+        console.log('password does not match');
+        return res.status(401).send('invalid username or password');
+      }
   
       const accessToken = jwt.sign({ username: user.username }, JWT_SECRET, { expiresIn: '1h' });
       res.json({ accessToken });

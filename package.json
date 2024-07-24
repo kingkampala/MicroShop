@@ -2,10 +2,10 @@
   "name": "microshop",
   "version": "1.0.0",
   "description": "MicroShop is an e-commerce platform leveraging a scalable microservices architecture for optimal performance and security. Built with Node.js, it features secure service communication, efficient caching, and automated deployment using Docker and Kubernetes.",
-  "main": "app.js",
+  "main": "src/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app.js"
+    "test": "jest",
+    "start": "nodemon src/server.js"
   },
   "keywords": [],
   "author": "kampala",
@@ -16,6 +16,10 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.4.4",
-    "nodemon": "^3.1.4"
+    "nodemon": "^3.1.4",
+    "supertest": "^7.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   }
 }
