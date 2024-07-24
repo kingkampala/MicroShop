@@ -17,7 +17,7 @@ describe('User Service', () => {
       dbName: 'microshop',
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 10000
+      serverSelectionTimeoutMS: 120000
     });
 
     server = app.listen(0);
@@ -26,7 +26,10 @@ describe('User Service', () => {
 
   afterAll(async () => {
     await mongoose.connection.close();
-    server.close();
+    if (server) {
+      server.close();
+    }
+    //server.close();
   });
 
   beforeEach(async () => {
