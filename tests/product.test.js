@@ -14,12 +14,14 @@ describe('Product Service', () => {
   beforeAll(async () => {
     await mongoose.connect(process.env.MONGO_URL, {
       dbName: 'microshop',
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+      /*useNewUrlParser: true,
+      useUnifiedTopology: true,*/
       serverSelectionTimeoutMS: 120000
     });
 
-    server = app.listen(0);
+    server = app.listen(30, () => {
+      console.log('test server running...');
+    });
     token = jwt.sign({ username: 'testuser' }, JWT_SECRET, { expiresIn: '1h' });
   });
 
