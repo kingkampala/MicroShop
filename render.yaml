@@ -2,6 +2,5 @@ services:
   - type: web
     name: MicroShop
     env: node
-    buildCommand: npm install
+    buildCommand: npm install && npm test
     startCommand: npm start
-    testCommand: npm test
