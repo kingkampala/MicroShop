@@ -1,7 +1,8 @@
 const { app, connectDb } = require('../src/app');
-const port = process.env.PORT || 2810;
+require('dotenv').config();
 
 const { MONGO_URL } = process.env;
+const port = process.env.PORT || 2810;
 
 const startServer = async () => {
     try {
