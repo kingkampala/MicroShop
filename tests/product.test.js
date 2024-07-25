@@ -56,7 +56,12 @@ describe('Product Service', () => {
     const product = new Product({ name: 'testproduct', price: 100 });
     await product.save();
 
+    console.log('Created Product ID:', product._id);
+
     const res = await request(server).get(`/product/${product._id}`);
+
+    console.log('Response Status:', res.statusCode);
+    console.log('Response Body:', res.body);
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty('name', 'testproduct');
