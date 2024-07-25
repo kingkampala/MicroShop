@@ -63,13 +63,14 @@ describe('Product Service', () => {
   });
 
   test('should update a product', async () => {
-    const product = new Product({ name: 'testproduct', price: 100 });
+    const uniqueProductName = `testproduct_${Date.now()}`;
+    const product = new Product({ name: uniqueProductName, price: 100 });
     await product.save();
 
     const res = await request(server)
       .put(`/product/${product._id}`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ name: 'updatedproduct', newPrice: 200 });
+      .send({ name: 'updatedproduct', newPrice: 200 });//`updated_${uniqueUsername}`
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty('product updated successfully');
