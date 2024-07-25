@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('../src/app');
+const { app, connectDb } = require('../src/app');
 const mongoose = require('mongoose');
 const User = require('../model/user');
 const jwt = require('jsonwebtoken');
@@ -13,15 +13,10 @@ describe('User Service', () => {
   let token;
 
   beforeAll(async () => {
-    await mongoose.connect(process.env.MONGO_URL, {
-      dbName: 'microshop',
-      /*useNewUrlParser: true,
-      useUnifiedTopology: true,*/
-      serverSelectionTimeoutMS: 120000
-    });
+    await connectDb();
 
     server = app.listen(0, () => {
-      console.log('test server running...');
+      console.log('test server is running...');
     });
     token = jwt.sign({ username: 'testuser' }, JWT_SECRET, { expiresIn: '1h' });
   });
