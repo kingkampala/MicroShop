@@ -13,6 +13,9 @@ describe('Product Service', () => {
   let token;
 
   beforeAll(async () => {
+    if (!MONGO_URL) {
+      throw new Error('MONGO_URL environment variable is not set');
+    }
     await connectDb(MONGO_URL);
 
     server = app.listen(0, () => {

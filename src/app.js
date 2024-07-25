@@ -15,6 +15,9 @@ app.use(`/product`, productRoute);
 const DB_URL = process.env.MONGO_URL
 
 const connectDb = () => {
+    if (!DB_URL) {
+        throw new Error('MONGO_URL environment variable is not set');
+    }
     return mongoose
         .connect(DB_URL, {
             dbName: 'microshop'
