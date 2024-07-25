@@ -70,7 +70,7 @@ describe('Product Service', () => {
     const res = await request(server)
       .put(`/product/${product._id}`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ name: 'updatedproduct', newPrice: 200 });//`updated_${uniqueUsername}`
+      .send({ name: 'updatedproduct', newPrice: 200 });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty('product updated successfully');

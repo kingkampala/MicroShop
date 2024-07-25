@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: [12.x, 14.x, 16.x]
 
     steps:
     - name: Checkout code
@@ -29,8 +29,9 @@ jobs:
       run: npm install
 
     - name: Set up environment variables
-      run: echo "MONGO_URL=${{ secrets.MONGO_URL }}" >> $GITHUB_ENV
-    - run: echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> $GITHUB_ENV
+      run: |
+        echo "MONGO_URL=${{ secrets.MONGO_URL }}" >> $GITHUB_ENV
+        echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> $GITHUB_ENV
 
     - name: Debug Info
       run: |
