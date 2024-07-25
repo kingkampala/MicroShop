@@ -12,6 +12,7 @@ const { MONGO_URL } = process.env;
 describe('User Service', () => {
   let server;
   let token;
+  let uniqueUsername;
 
   beforeAll(async () => {
     if (!MONGO_URL) {
@@ -22,7 +23,9 @@ describe('User Service', () => {
     server = app.listen(0, () => {
       console.log('test server is running...');
     });
-    token = jwt.sign({ username: 'testuser' }, JWT_SECRET, { expiresIn: '1h' });
+
+    uniqueUsername = `testuser_${Date.now()}`;
+    token = jwt.sign({ username: uniqueUsername }, JWT_SECRET, { expiresIn: '1h' });
   });
 
   afterAll(async () => {
@@ -33,13 +36,13 @@ describe('User Service', () => {
   });
 
   beforeEach(async () => {
-    await User.deleteMany({});
+    await User.deleteMany({ username: new RegExp(`^${uniqueUsername}`) });
   });
 
   test('should register a new user', async () => {
     const res = await request(server)
       .post('/user/register')
-      .send({ username: 'testuser', password: 'password123' });
+      .send({ username: uniqueUsername, password: 'password123' });
 
     expect(res.statusCode).toBe(201);
     expect(res.body).toHaveProperty('user registered successfully');
@@ -47,32 +50,32 @@ describe('User Service', () => {
 
   test('should login an existing user', async () => {
     const hashedPassword = await bcrypt.hash('password123', 10);
-    const user = new User({ username: 'testuser', password: hashedPassword });
+    const user = new User({ username: uniqueUsername, password: hashedPassword });
     await user.save();
 
     const res = await request(server)
       .post('/user/login')
-      .send({ username: 'testuser', password: 'password123' });
+      .send({ username: uniqueUsername, password: 'password123' });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty('accessToken');
   });
 
   test('should update a user', async () => {
-    const user = new User({ username: 'testuser', password: 'password123' });
+    const user = new User({ username: uniqueUsername, password: 'password123' });
     await user.save();
 
     const res = await request(server)
       .put(`/user/${user._id}`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ username: 'updateduser', newPassword: 'newpassword123' });
+      .send({ username: `updated_${uniqueUsername}`, newPassword: 'newpassword123' });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty('user updated successfully');
   });
 
   test('should delete a user', async () => {
-    const user = new User({ username: 'testuser', password: 'password123' });
+    const user = new User({ username: uniqueUsername, password: 'password123' });
     await user.save();
 
     const res = await request(server)
@@ -92,7 +95,7 @@ describe('User Service', () => {
   });
 
   test('should get a user by ID', async () => {
-    const user = new User({ username: 'testuser', password: 'password123' });
+    const user = new User({ username: uniqueUsername, password: 'password123' });
     await user.save();
 
     const res = await request(server)
@@ -100,6 +103,6 @@ describe('User Service', () => {
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toHaveProperty('username', 'testuser');
+    expect(res.body).toHaveProperty('username', uniqueUsername);
   });
 });
