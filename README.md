@@ -8,4 +8,6 @@ MicroShop is an e-commerce platform built using a scalable microservices archite
 * Performance optimization through caching and efficient database queries
 * CI/CD pipeline for automated testing and deployment
 
+[![Node.js CI](https://github.com/kingkampala/MicroShop/actions/workflows/ci.yml/badge.svg)](https://github.com/kingkampala/MicroShop/actions/workflows/ci.yml)
+
 Explore our codebase and contribute to building a robust, scalable e-commerce solution!
