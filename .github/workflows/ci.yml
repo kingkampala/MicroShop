@@ -30,7 +30,7 @@ jobs:
 
     - name: Set up environment variables
       run: echo "MONGODB_URL=${{ secrets.MONGODB_URL }}" >> $GITHUB_ENV
-      run: echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> $GITHUB_ENV
+    - run: echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> $GITHUB_ENV
 
     - name: Debug Info
       run: |
