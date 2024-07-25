@@ -6,13 +6,14 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const { JWT_SECRET } = process.env;
+const { MONGO_URL } = process.env;
 
 describe('Product Service', () => {
   let server;
   let token;
 
   beforeAll(async () => {
-    await connectDb();
+    await connectDb(MONGO_URL);
 
     server = app.listen(0, () => {
       console.log('test server is running...');
@@ -25,7 +26,6 @@ describe('Product Service', () => {
     if (server) {
       server.close();
     }
-    //server.close();
   });
 
   beforeEach(async () => {

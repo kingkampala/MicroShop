@@ -7,13 +7,14 @@ const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
 const { JWT_SECRET } = process.env;
+const { MONGO_URL } = process.env;
 
 describe('User Service', () => {
   let server;
   let token;
 
   beforeAll(async () => {
-    await connectDb();
+    await connectDb(MONGO_URL);
 
     server = app.listen(0, () => {
       console.log('test server is running...');
@@ -26,7 +27,6 @@ describe('User Service', () => {
     if (server) {
       server.close();
     }
-    //server.close();
   });
 
   beforeEach(async () => {
