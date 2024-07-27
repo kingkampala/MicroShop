@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: Node.js CI/CD Pipeline
 
 on:
   push:
@@ -45,9 +45,9 @@ jobs:
       with:
         push: true
         tags: |
-          ghcr.io/${{ github.repository_owner }}/microshop:auth
-          ghcr.io/${{ github.repository_owner }}/microshop:user
-          ghcr.io/${{ github.repository_owner }}/microshop:product
+          ghcr.io/kingkampala/microshop:auth
+          ghcr.io/kingkampala/microshop:user
+          ghcr.io/kingkampala/microshop:product
 
     - name: Set up kubectl
       uses: azure/setup-kubectl@v1
