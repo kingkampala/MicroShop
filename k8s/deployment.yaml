@@ -1,0 +1,130 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: microshop-config
+data:
+  NODE_ENV: "production"
+  PORT: "2810"
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongo-url-secret
+data:
+  MONGO_URL: bW9uZ29kYitzcnY6Ly9rYW1wYWxhOkthbXBhbGEyODEwQGNsdXN0ZXIwLmFpeHV6Z2EubW9uZ29kYi5uZXQvbWljcm9zaG9wP3JldHJ5V3JpdGVzPXRydWUmdz1tYWpvcml0eQ==
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: auth
+  template:
+    metadata:
+      labels:
+        app: auth
+    spec:
+      containers:
+      - name: auth
+        image: ghcr.io/kingkampala/microshop:auth
+        ports:
+        - containerPort: 2810
+        env:
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: microshop-config
+              key: NODE_ENV
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: microshop-config
+              key: PORT
+        - name: MONGO_URL
+          valueFrom:
+            secretKeyRef:
+              name: mongo-url-secret
+              key: MONGO_URL
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: user
+  template:
+    metadata:
+      labels:
+        app: user
+    spec:
+      containers:
+      - name: user
+        image: ghcr.io/kingkampala/microshop:user
+        ports:
+        - containerPort: 2810
+        env:
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: microshop-config
+              key: NODE_ENV
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: microshop-config
+              key: PORT
+        - name: MONGO_URL
+          valueFrom:
+            secretKeyRef:
+              name: mongo-url-secret
+              key: MONGO_URL
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: product
+  template:
+    metadata:
+      labels:
+        app: product
+    spec:
+      containers:
+      - name: product
+        image: ghcr.io/kingkampala/microshop:profile
+        ports:
+        - containerPort: 2810
+        env:
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: microshop-config
+              key: NODE_ENV
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: microshop-config
+              key: PORT
+        - name: MONGO_URL
+          valueFrom:
+            secretKeyRef:
+              name: mongo-url-secret
+              key: MONGO_URL
