@@ -40,15 +40,6 @@ jobs:
     - name: Run tests
       run: npm test
 
-    - name: Build and push Docker images
-      uses: docker/build-push-action@v3
-      with:
-        push: true
-        tags: |
-          ghcr.io/kingkampala/microshop:auth
-          ghcr.io/kingkampala/microshop:user
-          ghcr.io/kingkampala/microshop:product
-
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
 
@@ -58,6 +49,15 @@ jobs:
         registry: ghcr.io
         username: kingkampala
         password: ${{ secrets.GHCR_TOKEN }}
+
+    - name: Build and push Docker images
+      uses: docker/build-push-action@v3
+      with:
+        push: true
+        tags: |
+          ghcr.io/kingkampala/microshop:auth
+          ghcr.io/kingkampala/microshop:user
+          ghcr.io/kingkampala/microshop:product
 
     - name: Set up kubectl
       uses: azure/setup-kubectl@v1
