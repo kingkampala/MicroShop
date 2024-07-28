@@ -66,8 +66,7 @@ jobs:
 
     - name: Deploy to Kubernetes
       env:
-        KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        KUBECONFIG: $GITHUB_WORKSPACE/.kube/config
       run: |
-        echo "$KUBE_CONFIG_DATA" | base64 --decode > ~/.kube/config
         kubectl apply -f k8s/deployment.yaml
         kubectl apply -f k8s/service.yaml
