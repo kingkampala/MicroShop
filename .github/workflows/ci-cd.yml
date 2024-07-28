@@ -68,5 +68,7 @@ jobs:
       env:
         KUBECONFIG: $GITHUB_WORKSPACE/.kube/config
       run: |
+        mkdir -p ~/.kube
+        cp .kube/config ~/.kube/config
         kubectl apply -f k8s/deployment.yaml
         kubectl apply -f k8s/service.yaml
