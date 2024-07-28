@@ -64,11 +64,18 @@ jobs:
       with:
         version: v1.21.0
 
-    - name: Deploy to Kubernetes
+    - name: Create .kube directory
+      run: mkdir -p ~/.kube
+
+    - name: Decode and create kube config file
       env:
-        KUBECONFIG: $GITHUB_WORKSPACE/.kube/config
+        KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+      run: echo "$KUBE_CONFIG_DATA" | base64 --decode > ~/.kube/config
+
+    - name: Verify kubectl config
+      run: kubectl config view
+
+    - name: Deploy to Kubernetes
       run: |
-        mkdir -p ~/.kube
-        cp .kube/config ~/.kube/config
         kubectl apply -f k8s/deployment.yaml
         kubectl apply -f k8s/service.yaml
