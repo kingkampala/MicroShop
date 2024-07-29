@@ -16,6 +16,7 @@ router.get('/', authenticateToken, async (req, res, next) => {
         }
         const users = await get(req, res, next);
         await setCache('users', users);
+        res.json(users);
     } catch (error) {
         next(error);
     }
@@ -30,6 +31,7 @@ router.get('/:id', authenticateToken, async (req, res, next) => {
         }
         const user = await getId(req, res, next);
         await setCache(`user:${id}`, user);
+        res.json(user);
     } catch (error) {
         next(error);
     }
