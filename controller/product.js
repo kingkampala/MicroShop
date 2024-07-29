@@ -3,9 +3,10 @@ const Product = require('../model/product');
 const get = async (req, res) => {
   try {
     const products = await Product.find();
-    res.json(products);
+    return products;
   } catch (err) {
-    res.status(500).json({ error: 'server error' });
+    console.error('error fetching products:', err);
+    return { data: null, status: 500 };
   }
 };
 
@@ -13,10 +14,11 @@ const getId = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     if (!product) {
-      return res.status(404).json({ error: 'product not found' });
+      return { data: null, status: 404 };
     }
-    res.json(product);
+    return product;
   } catch (err) {
+    console.error('error fetching product:', err);
     res.status(500).json({ error: 'server error' });
   }
 };

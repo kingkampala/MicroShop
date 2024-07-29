@@ -109,24 +109,22 @@ const remove = async (req, res) => {
 const get = async (req, res) => {
   try {
     const users = await User.find({});
-    res.status(200).json(users);
+    return users;
   } catch (error) {
     console.error('error fetching users:', error);
-    res.status(500).json({ error: 'internal server error' });
+    return { data: null, status: 500 };
   }
 };
 
 const getId = async (req, res) => {
   try {
-    const userId = req.params.id
-
-    const user = await User.findById(userId);
+    const user = await User.findById(req.params.id);
     if (!user) {
-      return res.status(404).send('user not found');
+      return { data: null, status: 404 };
     }
-    res.status(200).json(user);
+    return user;
   } catch (error) {
-    console.error('error fetching users:', error);
+    console.error('error fetching user:', error);
     res.status(500).json({ error: 'internal server error' });
   }
 };

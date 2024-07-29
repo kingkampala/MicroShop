@@ -14,6 +14,7 @@ router.get('/', async (req, res, next) => {
         }
         const products = await get(req, res, next);
         await setCache('products', products);
+        res.json(products);
     } catch (error) {
         next(error);
     }
@@ -22,12 +23,13 @@ router.get('/', async (req, res, next) => {
 router.get('/:id', async (req, res, next) => {
     const { id } = req.params;
     try {
-        const cachedProduct = await getCache(`user:${id}`);
+        const cachedProduct = await getCache(`product:${id}`);
         if (cachedProduct) {
         return res.json(cachedProduct);
         }
         const product = await getId(req, res, next);
         await setCache(`product:${id}`, product);
+        res.json(product)
     } catch (error) {
         next(error);
     }
