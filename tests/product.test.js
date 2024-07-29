@@ -3,14 +3,18 @@ const { app, connectDb } = require('../src/app');
 const mongoose = require('mongoose');
 const Product = require('../model/product');
 const jwt = require('jsonwebtoken');
+const Redis = require('ioredis');
 require('dotenv').config();
 
 const { JWT_SECRET } = process.env;
 const { MONGO_URL } = process.env;
 
+jest.mock('ioredis', () => require('ioredis-mock'));
+
 describe('Product Service', () => {
   let server;
   let token;
+  let redisClient;
 
   beforeAll(async () => {
     if (!MONGO_URL) {
@@ -21,6 +25,9 @@ describe('Product Service', () => {
     server = app.listen(0, () => {
       console.log('test server is running...');
     });
+
+    redisClient = new Redis();
+
     token = jwt.sign({ username: 'testuser' }, JWT_SECRET, { expiresIn: '1h' });
   });
 
@@ -29,10 +36,16 @@ describe('Product Service', () => {
     if (server) {
       server.close();
     }
+    await redisClient.quit();
   });
 
   beforeEach(async () => {
     await Product.deleteMany({});
+    await redisClient.flushall();
+  });
+
+  afterEach(async () => {
+    await redisClient.flushall();
   });
 
   test('should upload a new product', async () => {

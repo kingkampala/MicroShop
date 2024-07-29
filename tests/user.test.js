@@ -4,14 +4,18 @@ const mongoose = require('mongoose');
 const User = require('../model/user');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const Redis = require('ioredis');
 require('dotenv').config();
 
 const { JWT_SECRET } = process.env;
 const { MONGO_URL } = process.env;
 
+jest.mock('ioredis', () => require('ioredis-mock'));
+
 describe('User Service', () => {
   let server;
   let token;
+  let redisClient;
   let uniqueUsername;
 
   beforeAll(async () => {
@@ -24,6 +28,8 @@ describe('User Service', () => {
       console.log('test server is running...');
     });
 
+    redisClient = new Redis();
+
     uniqueUsername = `testuser_${Date.now()}`;
     token = jwt.sign({ username: uniqueUsername }, JWT_SECRET, { expiresIn: '1h' });
   });
@@ -33,10 +39,16 @@ describe('User Service', () => {
     if (server) {
       server.close();
     }
+    await redisClient.quit();
   });
 
   beforeEach(async () => {
     await User.deleteMany({ username: new RegExp(`^${uniqueUsername}`) });
+    await redisClient.flushall();
+  });
+
+  afterEach(async () => {
+    await redisClient.flushall();
   });
 
   test('should register a new user', async () => {

@@ -30,6 +30,7 @@ jobs:
       run: |
         echo "MONGO_URL=${{ secrets.MONGO_URL }}" >> $GITHUB_ENV
         echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> $GITHUB_ENV
+        echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> $GITHUB_ENV
 
     - name: Debug Info
       run: |
