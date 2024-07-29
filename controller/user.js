@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../model/user');
+const { deleteCache } = require('../cache/service');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -21,6 +22,8 @@ const register = async (req, res) => {
       const newUser = new User({ username, password: hashedPassword });
   
       await newUser.save();
+
+      await deleteCache('users');
   
       res.status(201).send({'user registered successfully': newUser});
     } catch (error) {
@@ -67,7 +70,7 @@ const update = async (req, res) => {
           return res.status(400).send('user ID, username, and new password are required');
       }
 
-      const user = await User.findById(userId);
+      const user = await User.findByIdAndUpdate(userId);
 
       if (!user) {
           return res.status(404).send('user not found');
@@ -77,6 +80,9 @@ const update = async (req, res) => {
       user.password = await bcrypt.hash(newPassword, 10);
 
       await user.save();
+
+      await deleteCache(`user:${userId}`);
+      await deleteCache('users');
 
       res.status(200).send({'user updated successfully': user});
   } catch (error) {

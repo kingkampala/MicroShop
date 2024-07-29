@@ -41,6 +41,7 @@ router.delete('/:id', authenticateToken, async (req, res, next) => {
     const { id } = req.params;
     try {
         await deleteCache(`product:${id}`);
+        await deleteCache('products');
         await remove(req, res, next);
     } catch (error) {
         next(error);

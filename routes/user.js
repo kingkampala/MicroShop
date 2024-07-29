@@ -43,6 +43,7 @@ router.delete('/:id', authenticateToken, async (req, res, next) => {
     const { id } = req.params;
     try {
         await deleteCache(`user:${id}`);
+        await deleteCache('users');
         await remove(req, res, next);
     } catch (error) {
         next(error);
