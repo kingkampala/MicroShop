@@ -5,9 +5,10 @@ module.exports = {
         script: 'src/server.js',
         instances: 'max',
         exec_mode: 'cluster',
-        /*env: {
-          NODE_ENV: 'development'
-        },*/
+        env_development: {
+          NODE_ENV: 'development',
+          PORT: 2810
+        },
         env_production: {
           NODE_ENV: 'production',
           PORT: 8080
