@@ -4,7 +4,7 @@
   "description": "MicroShop is an e-commerce platform leveraging a scalable microservices architecture for optimal performance and security. Built with Node.js, it features secure service communication, efficient caching, and automated deployment using Docker and Kubernetes.",
   "main": "src/server.js",
   "scripts": {
-    "start": "pm2 start src/server.js",
+    "start": "pm2 start src/server.js -i max",
     "test": "jest",
     "dev": "pm2 start ecosystem.config.js --env production",
     "start:pm2": "pm2 start ecosystem.config.js --env development",
