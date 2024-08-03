@@ -14,7 +14,7 @@ module.exports = {
         },
         env_production: {
           NODE_ENV: 'production',
-          PORT: process.env.PORT
+          PORT: process.env.PORT,
         }
       }
     ]
