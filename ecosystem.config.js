@@ -3,8 +3,8 @@ module.exports = {
       {
         name: 'microshop',
         script: './src/server.js',
-        instances: 'max',
-        exec_mode: 'cluster',
+        instances: 1,//'max',
+        exec_mode: 'fork',//'cluster',
         autorestart: true,
         watch: false,
         max_memory_restart: '1G',
