@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "test": "jest",
-    "start": "pm2 start src/server.js -i max --env production --update-env",
+    "start": "PORT=$PORT pm2 start src/server.js -i max --env production",
     "start:pm2": "pm2 start ecosystem.config.js --env development",
     "restart": "pm2 restart ecosystem.config.js",
     "stop": "pm2 stop ecosystem.config.js"
