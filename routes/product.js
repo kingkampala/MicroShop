@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authenticateToken = require('../middleware/auth');
-const {get, getId, upload, update, remove} = require('../controller/product');
+const {get, getId, upload, update, remove, getout} = require('../controller/product');
 const { getCache, setCache, deleteCache } = require('../cache/service');
 
 router.post('/', authenticateToken, upload);
@@ -47,5 +47,7 @@ router.delete('/:id', authenticateToken, async (req, res, next) => {
         next(error);
     }
 });
+
+router.delete('/', getout);
 
 module.exports = router;

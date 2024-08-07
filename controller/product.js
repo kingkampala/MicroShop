@@ -87,4 +87,13 @@ const remove = async (req, res) => {
     }
   };
 
-module.exports = {get, getId, upload, update, remove};
+  const getout = async (req, res) => {
+    try {
+      await Product.deleteMany({});
+      res.status(200).json({ message: 'All products deleted successfully' });
+    } catch (error) {
+      res.status(500).json({ message: 'Error deleting products', details: error.message });
+    }
+  }
+
+module.exports = {get, getId, upload, update, remove, getout};

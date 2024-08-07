@@ -8,7 +8,7 @@ const Redis = require('ioredis');
 require('dotenv').config();
 
 const { JWT_SECRET } = process.env;
-const { MONGO_URL } = process.env;
+const { MONGO_URI } = process.env;
 
 jest.mock('ioredis', () => require('ioredis-mock'));
 
@@ -19,10 +19,10 @@ describe('User Service', () => {
   let uniqueUsername;
 
   beforeAll(async () => {
-    if (!MONGO_URL) {
+    if (!MONGO_URI) {
       throw new Error('MONGO_URL environment variable is not set');
     }
-    await connectDb(MONGO_URL);
+    await connectDb(MONGO_URI);
 
     server = app.listen(0, () => {
       console.log('test server is running...');

@@ -7,7 +7,7 @@ const Redis = require('ioredis');
 require('dotenv').config();
 
 const { JWT_SECRET } = process.env;
-const { MONGO_URL } = process.env;
+const { MONGO_URI } = process.env;
 
 jest.mock('ioredis', () => require('ioredis-mock'));
 
@@ -15,12 +15,13 @@ describe('Product Service', () => {
   let server;
   let token;
   let redisClient;
+  let uniqueProductName;
 
   beforeAll(async () => {
-    if (!MONGO_URL) {
+    if (!MONGO_URI) {
       throw new Error('MONGO_URL environment variable is not set');
     }
-    await connectDb(MONGO_URL);
+    await connectDb(MONGO_URI);
 
     server = app.listen(0, () => {
       console.log('test server is running...');
@@ -40,7 +41,8 @@ describe('Product Service', () => {
   });
 
   beforeEach(async () => {
-    await Product.deleteMany({});
+    uniqueProductName = `testproduct_${Date.now()}`;
+    await Product.deleteMany({ name: new RegExp(`^${uniqueProductName}`) });
     await redisClient.flushall();
   });
 
@@ -52,10 +54,10 @@ describe('Product Service', () => {
     const res = await request(server)
       .post('/product')
       .set('Authorization', `Bearer ${token}`)
-      .send({ name: 'testproduct', price: 100 });
+      .send({ name: uniqueProductName, price: 100 });
 
     expect(res.statusCode).toBe(201);
-    expect(res.body).toHaveProperty('name', 'testproduct');
+    expect(res.body).toHaveProperty('name', uniqueProductName);
   });
 
   test('should get all products', async () => {
@@ -66,31 +68,30 @@ describe('Product Service', () => {
   });
 
   test('should get a product by ID', async () => {
-    const product = new Product({ name: 'testproduct', price: 100 });
+    const product = new Product({ name: uniqueProductName, price: 100 });
     await product.save();
 
     const res = await request(server).get(`/product/${product._id}`);
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toHaveProperty('name', 'testproduct');
+    expect(res.body).toHaveProperty('name', uniqueProductName);
   });
 
   test('should update a product', async () => {
-    const uniqueProductName = `testproduct_${Date.now()}`;
     const product = new Product({ name: uniqueProductName, price: 100 });
     await product.save();
 
     const res = await request(server)
       .put(`/product/${product._id}`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ name: 'updatedproduct', newPrice: 200 });
+      .send({ name: `updated_${uniqueProductName}`, newPrice: 200 });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty('product updated successfully');
   });
 
   test('should delete a product', async () => {
-    const product = new Product({ name: 'testproduct', price: 100 });
+    const product = new Product({ name: uniqueProductName, price: 100 });
     await product.save();
 
     const res = await request(server)
