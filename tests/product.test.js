@@ -19,7 +19,7 @@ describe('Product Service', () => {
 
   beforeAll(async () => {
     if (!MONGO_URI) {
-      throw new Error('MONGO_URL environment variable is not set');
+      throw new Error('MONGO_URI environment variable is not set', Error.message);
     }
     await connectDb(MONGO_URI);
 
