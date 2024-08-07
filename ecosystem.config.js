@@ -3,23 +3,20 @@ module.exports = {
       {
         name: 'microshop',
         script: './src/server.js',
-        instances: 1,//'max',
-        exec_mode: 'fork',//'cluster',
+        instances: 'max',
+        exec_mode: 'cluster',
         autorestart: true,
         watch: false,
         max_memory_restart: '1G',
         increment_var: 'PORT',
         env_development: {
           NODE_ENV: 'development',
-          PORT: 2810
+          PORT: 3000
         },
         env_production: {
           NODE_ENV: 'production',
-          PORT: process.env.PORT || 3000
+          PORT: process.env.PORT || 2810
         },
-        output: './logs/out.log',
-        error: './logs/error.log',
-        log: './logs/combined.log'
       }
     ]
 };
