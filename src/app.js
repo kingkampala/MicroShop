@@ -26,14 +26,14 @@ warmCache()
     .catch((err) => 
         console.error('cache warming error', err));
 
-const DB_URL = process.env.MONGO_URL
+    const { MONGO_URL } = process.env;
 
 const connectDb = () => {
-    if (!DB_URL) {
+    if (!MONGO_URL) {
         throw new Error('MONGO_URL environment variable is not set');
     }
     return mongoose
-        .connect(DB_URL, {
+        .connect(MONGO_URL, {
             dbName: 'microshop'
         })
         .then(() => {

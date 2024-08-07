@@ -29,6 +29,7 @@ jobs:
     - name: Set up environment variables
       run: |
         echo "MONGO_URL=${{ secrets.MONGO_URL }}" >> $GITHUB_ENV
+        echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> $GITHUB_ENV
         echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> $GITHUB_ENV
         echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> $GITHUB_ENV
 
