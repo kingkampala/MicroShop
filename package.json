@@ -6,6 +6,7 @@
   "scripts": {
     "start": "nodemon src/server.js",
     "test": "jest",
+    "build": "npm install && npm test",
     "start-p": "pm2 start ecosystem.config.js --env production",
     "start-d": "pm2 start ecosystem.config.js --env development",
     "restart": "pm2 restart ecosystem.config.js",
