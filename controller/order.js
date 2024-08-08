@@ -106,7 +106,7 @@ const updateStats = async (req, res) => {
     order.status = status;
     await order.save();
 
-    await deleteCache(`order:${id}`);
+    await deleteCache(`order:${orderId}`);
     await deleteCache('orders');
 
     res.status(200).json({ message: 'order status updated', order });
