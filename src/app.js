@@ -5,6 +5,7 @@ const app = express();
 
 const userRoute = require('../routes/user');
 const productRoute = require('../routes/product');
+const orderRoute = require('../routes/order');
 
 const User = require('../model/user');
 const { setCache } = require('../cache/service');
@@ -14,6 +15,7 @@ app.use(express.urlencoded({ extended: true }))
 
 app.use(`/user`, userRoute);
 app.use(`/product`, productRoute);
+app.use(`/order`, orderRoute);
 
 const warmCache = async () => {
     const users = await User.find({});
