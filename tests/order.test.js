@@ -114,7 +114,7 @@ describe('Order Service', () => {
     await order.save();
 
     const res = await request(server)
-      .put(`/order/${order._id}/status`)
+      .put(`/order/${order._id}`)
       .set('Authorization', `Bearer ${token}`)
       .send({ status: 'shipped' });
 
@@ -128,7 +128,7 @@ describe('Order Service', () => {
     await order.save();
 
     const res = await request(server)
-      .delete(`/order/${order._id}`)
+      .patch(`/order/${order._id}`)
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.statusCode).toBe(200);
