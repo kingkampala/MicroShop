@@ -112,7 +112,7 @@ const updateStats = async (req, res) => {
     res.status(200).json({ message: 'order status updated', order });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'error updating order' });
+    res.status(500).json({ error: 'error updating order', details: error.message });
   }
 };
 
