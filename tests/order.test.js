@@ -2,33 +2,40 @@ const request = require('supertest');
 const { app, connectDb } = require('../src/app');
 const mongoose = require('mongoose');
 const Order = require('../model/order');
+const Product = require('../model/product');
 const User = require('../model/user');
 const jwt = require('jsonwebtoken');
+const Redis = require('ioredis');
 require('dotenv').config();
 
 const { JWT_SECRET, MONGO_URI } = process.env;
 
+jest.mock('ioredis', () => require('ioredis-mock'));
+
 describe('Order Service', () => {
   let server;
   let token;
-  let userId;
-  let productId;
+  let redisClient;
+  let uniqueOrderId;
+  let user;
+  let product;
 
   beforeAll(async () => {
+    if (!MONGO_URI) {
+      throw new Error('MONGO_URI environment variable is not set');
+    }
     await connectDb(MONGO_URI);
 
     server = app.listen(0, () => {
-      console.log('Test server is running...');
+      console.log('test server is running...');
     });
 
-    // Create a test user
-    const testUser = new User({ username: 'testuser', password: 'password123' });
-    await testUser.save();
-    userId = testUser._id;
-    token = jwt.sign({ username: testUser.username }, JWT_SECRET, { expiresIn: '1h' });
+    redisClient = new Redis();
 
-    // Assume a productId is available from the Product Service (can be mocked if necessary)
-    productId = new mongoose.Types.ObjectId();
+    user = await User.create({ name: 'test user', email: 'test@example.com', password: 'password' });
+    product = await Product.create({ name: 'test product', price: 10 });
+    
+    token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '1h' });
   });
 
   afterAll(async () => {
@@ -36,79 +43,107 @@ describe('Order Service', () => {
     if (server) {
       server.close();
     }
+    await redisClient.quit();
   });
 
   beforeEach(async () => {
-    await Order.deleteMany({});
+    uniqueOrderId = `testorder_${Date.now()}`;
+    await Order.deleteMany({ userId: user._id });
+    await redisClient.flushall();
   });
-});
 
-test('should create a new order', async () => {
-    const orderData = {
-      userId: userId.toString(),
-      productId: productId.toString(),
-      quantity: 2,
-    };
-  
+  afterEach(async () => {
+    await redisClient.flushall();
+  });
+
+  test('should create a new order', async () => {
     const res = await request(server)
-      .post('/order')
+      .post('/orders')
       .set('Authorization', `Bearer ${token}`)
-      .send(orderData);
-  
-    expect(res.statusCode).toBe(201);
-    expect(res.body).toHaveProperty('order created successfully');
-    expect(res.body.order).toMatchObject(orderData);
-});
+      .send({ productId: product._id, quantity: 1 });
 
-test('should retrieve all orders', async () => {
-    // Create a couple of test orders
-    const order1 = new Order({ userId, productId, quantity: 1 });
-    const order2 = new Order({ userId, productId, quantity: 3 });
-    await order1.save();
-    await order2.save();
-  
+    expect(res.statusCode).toBe(201);
+    expect(res.body.message).toBe('order created successfully');
+    expect(res.body.order).toHaveProperty('productId', product._id.toString());
+  });
+
+  test('should get an order by ID', async () => {
+    const order = new Order({ userId: user._id, productId: product._id, quantity: 1 });
+    await order.save();
+
     const res = await request(server)
-      .get('/order')
+      .get(`/orders/${order._id}`)
       .set('Authorization', `Bearer ${token}`);
-  
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('productId', product._id.toString());
+  });
+
+  test('should get all orders for user', async () => {
+    await Order.create({ userId: user._id, productId: product._id, quantity: 1 });
+    
+    const res = await request(server)
+      .get('/orders')
+      .set('Authorization', `Bearer ${token}`);
+
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body.length).toBe(2);
-});
+    expect(res.body.length).toBeGreaterThan(0);
+  });
 
-test('should retrieve an order by ID', async () => {
-    const order = new Order({ userId, productId, quantity: 2 });
+  test('should update an order', async () => {
+    const order = new Order({ userId: user._id, productId: product._id, quantity: 1 });
     await order.save();
-  
+
     const res = await request(server)
-      .get(`/order/${order._id}`)
-      .set('Authorization', `Bearer ${token}`);
-  
+      .put(`/orders/${order._id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ productId: product._id, quantity: 2 });
+
     expect(res.statusCode).toBe(200);
-    expect(res.body).toHaveProperty('_id', order._id.toString());
-});
+    expect(res.body.message).toBe('order updated');
+    expect(res.body.order).toHaveProperty('quantity', 2);
+  });
 
-test('should update order status', async () => {
-    const order = new Order({ userId, productId, quantity: 2, status: 'pending' });
+  test('should update order status', async () => {
+    const order = new Order({ userId: user._id, productId: product._id, quantity: 1, status: 'pending' });
     await order.save();
-  
+
     const res = await request(server)
-      .put(`/order/${order._id}`)
+      .put(`/orders/${order._id}/status`)
       .set('Authorization', `Bearer ${token}`)
       .send({ status: 'shipped' });
-  
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toHaveProperty('status', 'shipped');
-});
 
-test('should delete an order', async () => {
-    const order = new Order({ userId, productId, quantity: 2 });
-    await order.save();
-  
-    const res = await request(server)
-      .delete(`/order/${order._id}`)
-      .set('Authorization', `Bearer ${token}`);
-  
     expect(res.statusCode).toBe(200);
-    expect(res.body).toHaveProperty('message', 'order deleted successfully');
-});  
+    expect(res.body.message).toBe('order status updated');
+    expect(res.body.order).toHaveProperty('status', 'shipped');
+  });
+
+  test('should cancel an order', async () => {
+    const order = new Order({ userId: user._id, productId: product._id, quantity: 1, status: 'pending' });
+    await order.save();
+
+    const res = await request(server)
+      .delete(`/orders/${order._id}`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.message).toBe('order cancelled successfully');
+    const cancelledOrder = await Order.findById(order._id);
+    expect(cancelledOrder).toHaveProperty('status', 'cancelled');
+  });
+
+  test('should delete an order', async () => {
+    const order = new Order({ userId: user._id, productId: product._id, quantity: 1 });
+    await order.save();
+
+    const res = await request(server)
+      .delete(`/orders/${order._id}`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.message).toBe('order deleted successfully');
+    const deletedOrder = await Order.findById(order._id);
+    expect(deletedOrder).toBeNull();
+  });
+});

@@ -7,8 +7,7 @@ const bcrypt = require('bcryptjs');
 const Redis = require('ioredis');
 require('dotenv').config();
 
-const { JWT_SECRET } = process.env;
-const { MONGO_URI } = process.env;
+const { JWT_SECRET, MONGO_URI } = process.env;
 
 jest.mock('ioredis', () => require('ioredis-mock'));
 
