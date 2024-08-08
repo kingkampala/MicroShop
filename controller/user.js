@@ -43,13 +43,18 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
     try {
-      const { username, password } = req.body;
+      const { loginIdentifier, password } = req.body;
   
-      if (!username || !password) {
-        return res.status(400).send('username and password are required');
+      if (!loginIdentifier || !password) {
+        return res.status(400).send('username or email and password are required');
       }
   
-      const user = await User.findOne({ username });
+      const user = await User.findOne({
+        $or: [
+          { username: loginIdentifier },
+          { email: loginIdentifier }
+        ]
+      });
       
       if (!user || !(await bcrypt.compare(password, user.password))) {
         return res.status(401).send('invalid username or password');
@@ -62,11 +67,11 @@ const login = async (req, res) => {
         return res.status(401).send('invalid username or password');
       }
   
-      const accessToken = jwt.sign({ username: user.username }, JWT_SECRET, { expiresIn: '1h' });
+      const accessToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
       res.json({ accessToken });
     } catch (error) {
       console.error(error);
-      res.status(500).send('error logging in');
+      res.status(500).send({ error: 'error logging user', details: error.message });
     }
 };
 
