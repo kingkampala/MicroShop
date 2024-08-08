@@ -116,11 +116,11 @@ describe('Order Service', () => {
     const res = await request(server)
       .put(`/order/${order._id}/stats`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ status: 'shipped' });
+      .send({ status: 'completed' });
 
     expect(res.statusCode).toBe(200);
     expect(res.body.message).toBe('order status updated');
-    expect(res.body.order).toHaveProperty('status', 'shipped');
+    expect(res.body.order).toHaveProperty('status', 'completed');
   });
 
   test('should cancel an order', async () => {
