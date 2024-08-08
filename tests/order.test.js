@@ -6,6 +6,7 @@ const Product = require('../model/product');
 const User = require('../model/user');
 const jwt = require('jsonwebtoken');
 const Redis = require('ioredis');
+const { v4: uuidv4 } = require('uuid');
 require('dotenv').config();
 
 const { JWT_SECRET, MONGO_URI } = process.env;
@@ -17,7 +18,7 @@ describe('Order Service', () => {
   let token;
   let redisClient;
   let uniqueOrderId;
-  let uniqueUsername;
+  //let uniqueUsername;
   let user;
   let product;
 
@@ -33,8 +34,8 @@ describe('Order Service', () => {
 
     redisClient = new Redis();
 
-    user = await User.create({ username: 'test user', email: 'test@example.com', password: 'password' });
-    product = await Product.create({ name: 'test product', price: 10 });
+    user = await User.create({ _id: uuidv4(), username: `test_user_${Date.now()}`, email: 'test@example.com', password: 'password' });
+    product = await Product.create({ _id: uuidv4(), name: 'test product', price: 10 });
     
     token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '1h' });
   });
@@ -49,7 +50,8 @@ describe('Order Service', () => {
 
   beforeEach(async () => {
     uniqueOrderId = `testorder_${Date.now()}`;
-    await User.deleteMany({ username: new RegExp(`^${uniqueUsername}`) });
+    await User.deleteMany({ username: new RegExp(`^${`test_user_${Date.now()}`}`) });
+    await Product.deleteMany({ name: new RegExp(`^${`testproduct_${Date.now()}`}`) });
     await Order.deleteMany({ userId: user._id });
     await redisClient.flushall();
   });
@@ -70,7 +72,7 @@ describe('Order Service', () => {
   });
 
   test('should get an order by ID', async () => {
-    const order = new Order({ userId: user._id, productId: product._id, quantity: 1 });
+    const order = new Order({ _id: uuidv4(), userId: user._id, productId: product._id, quantity: 1 });
     await order.save();
 
     const res = await request(server)
@@ -82,7 +84,7 @@ describe('Order Service', () => {
   });
 
   test('should get all orders for user', async () => {
-    await Order.create({ userId: user._id, productId: product._id, quantity: 1 });
+    await Order.create({ _id: uuidv4(), userId: user._id, productId: product._id, quantity: 1 });
     
     const res = await request(server)
       .get('/order')
@@ -94,7 +96,7 @@ describe('Order Service', () => {
   });
 
   test('should update an order', async () => {
-    const order = new Order({ userId: user._id, productId: product._id, quantity: 1 });
+    const order = new Order({ _id: uuidv4(), userId: user._id, productId: product._id, quantity: 1 });
     await order.save();
 
     const res = await request(server)
@@ -108,7 +110,7 @@ describe('Order Service', () => {
   });
 
   test('should update order status', async () => {
-    const order = new Order({ userId: user._id, productId: product._id, quantity: 1, status: 'pending' });
+    const order = new Order({ _id: uuidv4(), userId: user._id, productId: product._id, quantity: 1, status: 'pending' });
     await order.save();
 
     const res = await request(server)
@@ -122,7 +124,7 @@ describe('Order Service', () => {
   });
 
   test('should cancel an order', async () => {
-    const order = new Order({ userId: user._id, productId: product._id, quantity: 1, status: 'pending' });
+    const order = new Order({ _id: uuidv4(), userId: user._id, productId: product._id, quantity: 1, status: 'pending' });
     await order.save();
 
     const res = await request(server)
@@ -136,7 +138,7 @@ describe('Order Service', () => {
   });
 
   test('should delete an order', async () => {
-    const order = new Order({ userId: user._id, productId: product._id, quantity: 1 });
+    const order = new Order({ _id: uuidv4(), userId: user._id, productId: product._id, quantity: 1 });
     await order.save();
 
     const res = await request(server)
