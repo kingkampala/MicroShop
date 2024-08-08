@@ -17,6 +17,7 @@ describe('Order Service', () => {
   let token;
   let redisClient;
   let uniqueOrderId;
+  let uniqueUsername;
   let user;
   let product;
 
@@ -32,7 +33,7 @@ describe('Order Service', () => {
 
     redisClient = new Redis();
 
-    user = await User.create({ name: 'test user', email: 'test@example.com', password: 'password' });
+    user = await User.create({ username: 'test user', email: 'test@example.com', password: 'password' });
     product = await Product.create({ name: 'test product', price: 10 });
     
     token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '1h' });
@@ -48,6 +49,7 @@ describe('Order Service', () => {
 
   beforeEach(async () => {
     uniqueOrderId = `testorder_${Date.now()}`;
+    await User.deleteMany({ username: new RegExp(`^${uniqueUsername}`) });
     await Order.deleteMany({ userId: user._id });
     await redisClient.flushall();
   });
@@ -58,7 +60,7 @@ describe('Order Service', () => {
 
   test('should create a new order', async () => {
     const res = await request(server)
-      .post('/orders')
+      .post('/order')
       .set('Authorization', `Bearer ${token}`)
       .send({ productId: product._id, quantity: 1 });
 
@@ -72,7 +74,7 @@ describe('Order Service', () => {
     await order.save();
 
     const res = await request(server)
-      .get(`/orders/${order._id}`)
+      .get(`/order/${order._id}`)
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.statusCode).toBe(200);
@@ -83,7 +85,7 @@ describe('Order Service', () => {
     await Order.create({ userId: user._id, productId: product._id, quantity: 1 });
     
     const res = await request(server)
-      .get('/orders')
+      .get('/order')
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.statusCode).toBe(200);
@@ -96,7 +98,7 @@ describe('Order Service', () => {
     await order.save();
 
     const res = await request(server)
-      .put(`/orders/${order._id}`)
+      .put(`/order/${order._id}`)
       .set('Authorization', `Bearer ${token}`)
       .send({ productId: product._id, quantity: 2 });
 
@@ -110,7 +112,7 @@ describe('Order Service', () => {
     await order.save();
 
     const res = await request(server)
-      .put(`/orders/${order._id}/status`)
+      .put(`/order/${order._id}/status`)
       .set('Authorization', `Bearer ${token}`)
       .send({ status: 'shipped' });
 
@@ -124,7 +126,7 @@ describe('Order Service', () => {
     await order.save();
 
     const res = await request(server)
-      .delete(`/orders/${order._id}`)
+      .delete(`/order/${order._id}`)
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.statusCode).toBe(200);
@@ -138,7 +140,7 @@ describe('Order Service', () => {
     await order.save();
 
     const res = await request(server)
-      .delete(`/orders/${order._id}`)
+      .delete(`/order/${order._id}`)
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.statusCode).toBe(200);
