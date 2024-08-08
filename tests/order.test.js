@@ -114,7 +114,7 @@ describe('Order Service', () => {
     await order.save();
 
     const res = await request(server)
-      .put(`/order/${order._id}`)
+      .put(`/order/${order._id}/stats`)
       .set('Authorization', `Bearer ${token}`)
       .send({ status: 'shipped' });
 

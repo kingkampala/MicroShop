@@ -37,7 +37,7 @@ router.get('/:id', authenticateToken, async (req, res, next) => {
 
 router.put('/:id/', authenticateToken, updateOrder);
 
-router.put('/:id/', authenticateToken, updateStats);
+router.put('/:id/stats', authenticateToken, updateStats);
 
 router.patch('/:id', authenticateToken, cancel);
 
