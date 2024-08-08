@@ -7,19 +7,28 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 const register = async (req, res) => {
     try {
-      const { username, password } = req.body;
+      const { name, username, email, password, confirmPassword } = req.body;
   
-      if (!username || !password) {
-        return res.status(400).send('username and password are required');
+      if (!name || !username || !email || !password | !confirmPassword) {
+        return res.status(400).send('registration details are required complete');
       }
   
       const existingUser = await User.findOne({ username });
       if (existingUser) {
         return res.status(409).send('username already exists');
       }
+
+      const existingEmail = await User.findOne({ email });
+      if (existingEmail) {
+        return res.status(409).send('email already exists');
+      }
+
+      if (password !== confirmPassword) {
+        return res.status(400).json({ error: 'passwords do not match.' });
+      }
   
       const hashedPassword = await bcrypt.hash(password, 10);
-      const newUser = new User({ username, password: hashedPassword });
+      const newUser = new User({ name, username, email, password: hashedPassword });
   
       await newUser.save();
 
@@ -28,7 +37,7 @@ const register = async (req, res) => {
       res.status(201).send({'user registered successfully': newUser});
     } catch (error) {
       console.error(error);
-      res.status(500).send('error registering user');
+      res.status(500).send({ error: 'error registering user', details: error.message });
     }
 };
 

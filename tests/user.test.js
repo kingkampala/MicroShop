@@ -30,6 +30,7 @@ describe('User Service', () => {
     redisClient = new Redis();
 
     uniqueUsername = `testuser_${Date.now()}`;
+    uniqueEmail = `testemail_${Date.now()}`;
     token = jwt.sign({ username: uniqueUsername }, JWT_SECRET, { expiresIn: '1h' });
   });
 
@@ -53,7 +54,7 @@ describe('User Service', () => {
   test('should register a new user', async () => {
     const res = await request(server)
       .post('/user/register')
-      .send({ username: uniqueUsername, password: 'password123' });
+      .send({ name: 'test user', username: uniqueUsername, email: uniqueEmail, password: 'password123' });
 
     expect(res.statusCode).toBe(201);
     expect(res.body).toHaveProperty('user registered successfully');
