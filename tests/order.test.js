@@ -120,7 +120,8 @@ describe('Order Service', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body.message).toBe('order status updated');
-    expect(res.body.order).toHaveProperty('status', 'completed');
+    const orderStats = await Order.findById(order._id);
+    expect(orderStats).toHaveProperty('status', 'completed');
   });
 
   test('should cancel an order', async () => {
