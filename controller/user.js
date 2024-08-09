@@ -77,11 +77,11 @@ const login = async (req, res) => {
 
 const update = async (req, res) => {
   try {
-      const { username, newPassword } = req.body;
+      const { username, email, newPassword } = req.body;
       const userId = req.params.id;
 
-      if (!userId || !username || !newPassword) {
-          return res.status(400).send('user ID, username, and new password are required');
+      if (!username && !email && !newPassword) {
+        return res.status(400).send('at least one field (username, email, or new password) is required');
       }
 
       const user = await User.findByIdAndUpdate(userId);
@@ -91,6 +91,7 @@ const update = async (req, res) => {
       }
 
       user.username = username;
+      user.email = email;
       user.password = await bcrypt.hash(newPassword, 10);
 
       await user.save();
