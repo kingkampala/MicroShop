@@ -61,14 +61,14 @@ describe('User Service', () => {
   test('should register a new user', async () => {
     const res = await request(server)
       .post('/user/register')
-      .send({ name: 'test user', username: uniqueUsername, email: uniqueEmail, password: 'password123', confirmPassword: 'password123' });
+      .send({ name: 'test user', username: uniqueUsername, email: uniqueEmail, password: 'Password123!', confirmPassword: 'Password123!' });
 
     expect(res.statusCode).toBe(201);
     expect(res.body).toHaveProperty('user registered successfully');
   });
 
   test('should login an existing user', async () => {
-    const hashedPassword = await bcrypt.hash('password123', 10);
+    const hashedPassword = await bcrypt.hash('Password123!', 10);
     const user = new User({ 
       username: uniqueUsername, 
       email: uniqueEmail, 
@@ -78,34 +78,34 @@ describe('User Service', () => {
 
     const resByUsername = await request(server)
       .post('/user/login')
-      .send({ loginIdentifier: uniqueUsername, password: 'password123' });
+      .send({ loginIdentifier: uniqueUsername, password: 'Password123!' });
 
     expect(resByUsername.statusCode).toBe(200);
     expect(resByUsername.body).toHaveProperty('accessToken');
 
     const resByEmail = await request(server)
       .post('/user/login')
-      .send({ loginIdentifier: uniqueEmail, password: 'password123' });
+      .send({ loginIdentifier: uniqueEmail, password: 'Password123!' });
 
     expect(resByEmail.statusCode).toBe(200);
     expect(resByEmail.body).toHaveProperty('accessToken');
   });
 
   test('should update a user', async () => {
-    const hashedPassword = await bcrypt.hash('password123', 10);
+    const hashedPassword = await bcrypt.hash('Password123!', 10);
     const user = new User({ username: uniqueUsername, email: uniqueEmail, password: hashedPassword });
     await user.save();
     const res = await request(server)
       .put(`/user/${user._id}`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ username: `updated_${uniqueUsername}`, email: `updated_${uniqueEmail}`, newPassword: 'newpassword123' });
+      .send({ username: `updated_${uniqueUsername}`, email: `updated_${uniqueEmail}`, newPassword: 'newPassword123!' });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty('user updated successfully');
   });
 
   test('should delete a user', async () => {
-    const hashedPassword = await bcrypt.hash('password123', 10);
+    const hashedPassword = await bcrypt.hash('Password123!', 10);
     const user = new User({ username: uniqueUsername, email: uniqueEmail, password: hashedPassword });
     await user.save();
     const res = await request(server)
@@ -126,7 +126,7 @@ describe('User Service', () => {
   });
 
   test('should get a user by ID', async () => {
-    const hashedPassword = await bcrypt.hash('password123', 10);
+    const hashedPassword = await bcrypt.hash('Password123!', 10);
     const user = new User({ username: uniqueUsername, email: uniqueEmail, password: hashedPassword });
     await user.save();
     const res = await request(server)
