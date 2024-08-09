@@ -18,7 +18,6 @@ describe('Order Service', () => {
   let token;
   let redisClient;
   let uniqueOrderId;
-  //let uniqueUsername;
   let user;
   let product;
 
@@ -34,7 +33,7 @@ describe('Order Service', () => {
 
     redisClient = new Redis();
 
-    user = await User.create({ _id: uuidv4(), username: `test_user_${Date.now()}`, email: 'test@example.com', password: 'password' });
+    user = await User.create({ _id: uuidv4(), username: `test_user_${Date.now()}`, email: 'test@example.com', password: 'Password1!' });
     product = await Product.create({ _id: uuidv4(), name: 'test product', price: 10 });
     
     token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '1h' });
