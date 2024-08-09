@@ -14,22 +14,23 @@ app.use(`/user`, userRoute);
 app.use(`/product`, productRoute);
 app.use(`/order`, orderRoute);
 
-const { MONGO_URL } = process.env;
 
 const connectDb = () => {
-    if (!MONGO_URL) {
-        throw new Error('MONGO_URL environment variable is not set');
+    const mongoUrl = process.env.NODE_ENV === 'test' ? process.env.MONGO_URI : process.env.MONGO_URL;
+
+    if (!mongoUrl) {
+        throw new Error('MongoDb URL environment variable is not set');
     }
     return mongoose
-        .connect(MONGO_URL, {
-            dbName: 'microshop',
-            bufferCommands: true
+        .connect(mongoUrl, {
+            dbName: process.env.NODE_ENV === 'test' ? 'microshop' : 'microshop-main',
+            bufferCommands: false
         })
         .then(() => {
-            console.log('database connection successful');
+            console.log(`connected to ${process.env.NODE_ENV === 'test' ? 'test' : 'development'} database`);
         })
         .catch((err) => {
-            console.error('database connection error', err);
+            console.error('database connection error:', err);
         });
 }
 

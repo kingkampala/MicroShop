@@ -7,7 +7,7 @@ const User = require('../model/user');
 const jwt = require('jsonwebtoken');
 const Redis = require('ioredis');
 const { v4: uuidv4 } = require('uuid');
-require('dotenv').config();
+require('dotenv').config({ path: '.env.test' });
 
 const { JWT_SECRET, MONGO_URI } = process.env;
 
@@ -25,7 +25,7 @@ describe('Order Service', () => {
     if (!MONGO_URI) {
       throw new Error('MONGO_URI environment variable is not set');
     }
-    await connectDb(MONGO_URI);
+    await connectDb();
 
     server = app.listen(0, () => {
       console.log('test server is running...');

@@ -4,12 +4,11 @@ require('dotenv').config();
 
 const { setCache } = require('../cache/service');
 
-const { MONGO_URL } = process.env;
 const port = process.env.PORT || 2810;
 
 const startServer = async () => {
     try {
-      await connectDb(MONGO_URL);
+      await connectDb();
 
       const warmCache = async () => {
         const users = await User.find({});
