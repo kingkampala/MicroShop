@@ -5,12 +5,24 @@ const { deleteCache } = require('../cache/service');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
+const validatePassword = (password) => {
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(password);
+};
+
 const register = async (req, res) => {
     try {
       const { name, username, email, password, confirmPassword } = req.body;
   
       if (!name || !username || !email || !password | !confirmPassword) {
         return res.status(400).send('registration details are required complete');
+      }
+
+      if (!validatePassword(password)) {
+        return res.status(400).json({ error: `${password} does not meet requirements, it must contain at least 8 characters, including 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character.` });
+      }
+
+      if (password !== confirmPassword) {
+        return res.status(400).json({ error: 'passwords do not match.' });
       }
   
       const existingUser = await User.findOne({ username });
@@ -21,10 +33,6 @@ const register = async (req, res) => {
       const existingEmail = await User.findOne({ email });
       if (existingEmail) {
         return res.status(409).send('email already exists');
-      }
-
-      if (password !== confirmPassword) {
-        return res.status(400).json({ error: 'passwords do not match.' });
       }
   
       const hashedPassword = await bcrypt.hash(password, 10);
