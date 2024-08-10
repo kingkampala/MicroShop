@@ -14,7 +14,6 @@ app.use(`/user`, userRoute);
 app.use(`/product`, productRoute);
 app.use(`/order`, orderRoute);
 
-
 const connectDb = () => {
     const mongoUrl = process.env.NODE_ENV === 'test' ? process.env.MONGO_URI : process.env.MONGO_URL;
 
