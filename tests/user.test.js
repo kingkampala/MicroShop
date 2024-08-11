@@ -67,6 +67,60 @@ describe('User Service', () => {
     expect(res.body).toHaveProperty('user registered successfully');
   });
 
+  test('should return error for duplicate username (case insensitive)', async () => {
+    // Register the first user
+    await request(server)
+      .post('/user/register')
+      .send({ 
+        name: 'test user', 
+        username: uniqueUsername.toLowerCase(), 
+        email: uniqueEmail, 
+        password: 'Password123!', 
+        confirmPassword: 'Password123!' 
+      });
+
+    // Attempt to register another user with the same username but different case
+    const res = await request(server)
+      .post('/user/register')
+      .send({ 
+        name: 'test user', 
+        username: uniqueUsername.toUpperCase(), 
+        email: `new_${uniqueEmail}`, 
+        password: 'Password123!', 
+        confirmPassword: 'Password123!' 
+      });
+
+    expect(res.statusCode).toBe(409);
+    expect(res.text).toBe('username already exists');
+  });
+
+  test('should return error for duplicate email (case insensitive)', async () => {
+    // Register the first user
+    await request(server)
+      .post('/user/register')
+      .send({ 
+        name: 'test user', 
+        username: uniqueUsername, 
+        email: uniqueEmail.toLowerCase(), 
+        password: 'Password123!', 
+        confirmPassword: 'Password123!' 
+      });
+
+    // Attempt to register another user with the same email but different case
+    const res = await request(server)
+      .post('/user/register')
+      .send({ 
+        name: 'test user', 
+        username: `new_${uniqueUsername}`, 
+        email: uniqueEmail.toUpperCase(), 
+        password: 'Password123!', 
+        confirmPassword: 'Password123!' 
+      });
+
+    expect(res.statusCode).toBe(409);
+    expect(res.text).toBe('email already exists');
+  });
+
   test('should login an existing user', async () => {
     const hashedPassword = await bcrypt.hash('Password123!', 10);
     const user = new User({ 

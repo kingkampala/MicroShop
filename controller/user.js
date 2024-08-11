@@ -6,9 +6,9 @@ require('dotenv').config();
 
 const { JWT_SECRET } = process.env;
 
-const validatePassword = (password) => {
+/*const validatePassword = (password) => {
   return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(password);
-};
+};*/
 
 const register = async (req, res) => {
     try {
@@ -18,6 +18,10 @@ const register = async (req, res) => {
         return res.status(400).send('registration details are required complete');
       }
 
+      const validatePassword = (password) => {
+        return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(password);
+      };
+
       if (!validatePassword(password)) {
         return res.status(400).json({ error: `${password} does not meet password requirements, it must contain at least 8 characters, including 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character.` });
       }
@@ -26,12 +30,12 @@ const register = async (req, res) => {
         return res.status(400).json({ error: 'passwords do not match.' });
       }
   
-      const existingUser = await User.findOne({ username });
+      const existingUser = await User.findOne({ username }).collation({ locale: 'en', strength: 2 });
       if (existingUser) {
         return res.status(409).send('username already exists');
       }
 
-      const existingEmail = await User.findOne({ email });
+      const existingEmail = await User.findOne({ email }).collation({ locale: 'en', strength: 2 });
       if (existingEmail) {
         return res.status(409).send('email already exists');
       }
@@ -39,11 +43,17 @@ const register = async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = new User({ name, username, email, password: hashedPassword });
   
-      await newUser.save();
-
-      await deleteCache('users');
-  
-      res.status(201).send({'user registered successfully': newUser});
+      try {
+        await newUser.save();
+        await deleteCache('users');
+        return res.status(201).send({ 'user registered successfully': newUser });
+      } catch (error) {
+        if (error.code === 11000) {
+          const duplicateField = Object.keys(error.keyPattern)[0];
+          return res.status(409).send(`${duplicateField} already exists.`);
+        }
+        throw error;
+      }
     } catch (error) {
       console.error(error);
       res.status(500).send({ error: 'error registering user', details: error.message });
