@@ -6,10 +6,6 @@ require('dotenv').config();
 
 const { JWT_SECRET } = process.env;
 
-/*const validatePassword = (password) => {
-  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(password);
-};*/
-
 const register = async (req, res) => {
     try {
       const { name, username, email, password, confirmPassword } = req.body;
@@ -109,9 +105,33 @@ const update = async (req, res) => {
           return res.status(404).send('user not found');
       }
 
-      user.username = username;
-      user.email = email;
-      user.password = await bcrypt.hash(newPassword, 10);
+      if (username && username !== user.username) {
+        const existingUser = await User.findOne({ username }).collation({ locale: 'en', strength: 2 });
+        if (existingUser) {
+          return res.status(409).send('username already exists');
+        }
+        user.username = username;
+      }
+
+      if (email && email !== user.email) {
+        const existingEmail = await User.findOne({ email }).collation({ locale: 'en', strength: 2 });
+        if (existingEmail) {
+          return res.status(409).send('email already exists');
+        }
+        user.email = email;
+      }
+
+      if (newPassword) {
+        const validatePassword = (password) => {
+          return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(password);
+        };
+  
+        if (!validatePassword(newPassword)) {
+          return res.status(400).json({ error: `${newPassword} does not meet password requirements, it must contain at least 8 characters, including 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.` });
+        }
+  
+        user.password = await bcrypt.hash(newPassword, 10);
+      }
 
       await user.save();
 
@@ -121,7 +141,7 @@ const update = async (req, res) => {
       res.status(200).send({'user updated successfully': user});
   } catch (error) {
       console.error(error);
-      res.status(500).send('error updating user');
+      res.status(500).send({ error: 'error updating user', details: error.message });
   }
 };
 
