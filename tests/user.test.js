@@ -68,7 +68,7 @@ describe('User Service', () => {
   });
 
   test('should return error for duplicate username (case insensitive)', async () => {
-    // Register the first user
+    // register the first user
     await request(server)
       .post('/user/register')
       .send({ 
@@ -79,7 +79,7 @@ describe('User Service', () => {
         confirmPassword: 'Password123!' 
       });
 
-    // Attempt to register another user with the same username but different case
+    // attempt to register another user with the same username but different case
     const res = await request(server)
       .post('/user/register')
       .send({ 
@@ -95,7 +95,7 @@ describe('User Service', () => {
   });
 
   test('should return error for duplicate email (case insensitive)', async () => {
-    // Register the first user
+    // register the first user
     await request(server)
       .post('/user/register')
       .send({ 
@@ -106,7 +106,7 @@ describe('User Service', () => {
         confirmPassword: 'Password123!' 
       });
 
-    // Attempt to register another user with the same email but different case
+    // attempt to register another user with the same email but different case
     const res = await request(server)
       .post('/user/register')
       .send({ 
