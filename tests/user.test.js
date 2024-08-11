@@ -152,10 +152,64 @@ describe('User Service', () => {
     const res = await request(server)
       .put(`/user/${user._id}`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ username: `updated_${uniqueUsername}`, email: `updated_${uniqueEmail}`, newPassword: 'newPassword123!' });
+      .send({ username: `updated_${uniqueUsername}`, email: `updated_${uniqueEmail}`, newPassword: 'NewPassword123!' });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty('user updated successfully');
+
+    const updatedUser = await User.findById(user._id);
+    expect(updatedUser.username).toBe(`updated_${uniqueUsername}`);
+    expect(updatedUser.email).toBe(`updated_${uniqueEmail}`);
+
+    const isPasswordMatch = await bcrypt.compare('NewPassword123!', updatedUser.password);
+    expect(isPasswordMatch).toBe(true);
+  });
+
+  test('should return 409 if username already exists', async () => {
+    const existingUser = new User({ username: `existing_${uniqueUsername}`, email: `existing_${uniqueEmail}`, password: 'Password123!' });
+    await existingUser.save();
+
+    const user = new User({ username: uniqueUsername, email: uniqueEmail, password: 'Password123!' });
+    await user.save();
+
+    const res = await request(server)
+      .put(`/user/${user._id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ username: `existing_${uniqueUsername}` });
+
+    expect(res.statusCode).toBe(409);
+    expect(res.text).toBe('username already exists');
+});
+
+  test('should return 409 if email already exists', async () => {
+      const existingUser = new User({ username: uniqueUsername, email: uniqueEmail, password: 'Password123!' });
+      await existingUser.save();
+
+      const uniqueUsername1 = `testuser1_${Date.now()}`;
+      const uniqueEmail1 = `testemail1_${Date.now()}`;
+      const user = new User({ username: uniqueUsername1, email: uniqueEmail1, password: 'Password123!' });
+      await user.save();
+
+      const res = await request(server)
+        .put(`/user/${user._id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ email: uniqueEmail });
+
+      expect(res.statusCode).toBe(409);
+      expect(res.text).toBe('email already exists');
+  });
+
+  test('should return 400 if password does not meet criteria', async () => {
+      const user = new User({ username: uniqueUsername, email: uniqueEmail, password: 'Password123!' });
+      await user.save();
+
+      const res = await request(server)
+        .put(`/user/${user._id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ newPassword: 'short' });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toContain('does not meet password requirements');
   });
 
   test('should delete a user', async () => {
