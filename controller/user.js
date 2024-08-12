@@ -110,27 +110,30 @@ const reset = async (req, res) => {
       return res.status(400).send('passwords are required')
     }
 
-    const user = await User.findByIdAndUpdate(userId);
+    const user = await User.findById(userId);
 
     if (!user) {
       return res.status(404).send('user not found');
     }
 
-    if (newPassword) {
-      const validatePassword = (password) => {
-        return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(password);
-      };
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    if (!isPasswordMatch) {
+      return res.status(409).send('wrong password.');
+    }
 
-      if (!validatePassword(newPassword)) {
-        return res.status(400).json({ error: `${newPassword} does not meet password requirements, it must contain at least 8 characters, including 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.` });
-      }
+    const validatePassword = (password) => {
+      return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(password);
+    };
 
-      user.password = await bcrypt.hash(newPassword, 10);
+    if (!validatePassword(newPassword)) {
+      return res.status(400).json({ error: `${newPassword} does not meet password requirements, it must contain at least 8 characters, including 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.` });
     }
 
     if (newPassword !== confirmPassword) {
       return res.status(400).json({ error: 'passwords do not match.' });
     }
+
+    user.password = await bcrypt.hash(newPassword, 10);
 
     await user.save();
 
