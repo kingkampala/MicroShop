@@ -114,7 +114,7 @@ const login = async (req, res) => {
           'New Login Detected',
           `Hi ${user.name},\n\nA new login to your account was detected. If this was not you, please reset your password immediately.\n\nBest regards,\nMicroshop Team`
         );
-        
+
         res.json({ accessToken });
       }
     } catch (error) {
@@ -177,10 +177,10 @@ const reset = async (req, res) => {
 
 const update = async (req, res) => {
   try {
-      const { username, email, newPassword } = req.body;
+      const { username, email } = req.body;
       const userId = req.params.id;
 
-      if (!username && !email && !newPassword) {
+      if (!username && !email) {
         return res.status(400).send('at least username, email, or new password is required');
       }
 
@@ -189,6 +189,9 @@ const update = async (req, res) => {
       if (!user) {
           return res.status(404).send('user not found');
       }
+
+      let updateMessage = '';
+      let subject = 'Your Account Has Been Updated';
 
       const validateEmail = (email) => {
         const regex = /^[^\s@]+@[^\s@]+\.(com|net|org|edu|gov|mil|biz|info|mobi|name|aero|jobs|museum|co\.[a-z]{2}|[a-z]{2})$/i;
@@ -201,6 +204,7 @@ const update = async (req, res) => {
           return res.status(409).send('username already exists');
         }
         user.username = username;
+        updateMessage += 'Your username has been successfully updated.\n';
       }
 
       if (email) {
@@ -213,19 +217,12 @@ const update = async (req, res) => {
             return res.status(409).send('email already exists');
           }
           user.email = email;
+          updateMessage += 'Your email has been successfully updated.\n';
         }
       }
 
-      if (newPassword) {
-        const validatePassword = (password) => {
-          return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(password);
-        };
-  
-        if (!validatePassword(newPassword)) {
-          return res.status(400).json({ error: `${newPassword} does not meet password requirements, it must contain at least 8 characters, including 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.` });
-        }
-  
-        user.password = await bcrypt.hash(newPassword, 10);
+      if (updateMessage === '') {
+        return res.status(400).send('no valid updates provided');
       }
 
       await user.save();
@@ -235,8 +232,8 @@ const update = async (req, res) => {
 
       await sendEmail(
         user.email,
-        'Your Account Has Been Updated',
-        `Hi ${user.name},\n\nYour account details have been successfully updated.\n\nBest regards,\nMicroshop Team`
+        subject,
+        `Hi ${user.name},\n\n${updateMessage}\n\nBest regards,\nMicroshop Team`
       );
 
       res.status(200).send({'user updated successfully': user});
@@ -290,4 +287,39 @@ const getId = async (req, res) => {
   }
 };
 
-module.exports = {register, login, reset, update, remove, get, getId};
+const search = async (req, res) => {
+  try {
+    const { query } = req.query;
+    if (!query) {
+      return res.status(400).json({ message: 'search query is required' });
+    }
+
+    const searchRegex = new RegExp(query, 'i');
+    const cacheKey = `search:${query}`;
+
+    const cachedUsers = await getCache(cacheKey);
+    if (cachedUsers) {
+      return res.status(200).json({ users: cachedUsers });
+    }
+
+    const users = await User.find({
+      $or: [
+        { username: searchRegex },
+        { email: searchRegex },
+        { name: searchRegex }
+      ]
+    });
+
+    if (users && users.length > 0) {
+      await setCache(cacheKey, users);
+      return res.status(200).json({ users });
+    } else {
+      return res.status(404).json({ message: 'no users found' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'error searching for users', error: error.message });
+  }
+};
+
+module.exports = {register, login, reset, update, remove, get, getId, search};

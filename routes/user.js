@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authenticateToken = require('../middleware/auth');
-const {register, login, reset, update, remove, get, getId} = require('../controller/user');
+const {register, login, reset, update, remove, get, getId, search} = require('../controller/user');
 const { getCache, setCache, deleteCache } = require('../cache/service');
 
 router.post('/register', register);
@@ -38,6 +38,8 @@ router.get('/:id', authenticateToken, async (req, res, next) => {
         next(error);
     }
 });
+
+router.get('/search', authenticateToken, search);
 
 router.put('/:id', authenticateToken, update);
 
