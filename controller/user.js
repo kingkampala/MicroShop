@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../model/user');
+const sendEmail = require('../email/service');
 const { deleteCache } = require('../cache/service');
 require('dotenv').config();
 
@@ -51,6 +52,13 @@ const register = async (req, res) => {
       try {
         await newUser.save();
         await deleteCache('users');
+
+        await sendEmail(
+          newUser.email,
+          'Welcome to Microshop!',
+          `Hi ${newUser.name},\n\nThank you for registering with us!\n\nBest regards,\nMicroshop Team`
+        );
+
         return res.status(201).send({ 'user registered successfully': newUser });
       } catch (error) {
         if (error.code === 11000) {
@@ -85,6 +93,13 @@ const login = async (req, res) => {
         }
   
         const accessToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
+
+        await sendEmail(
+          user.email,
+          'New Login Detected',
+          `Hi ${user.name},\n\nA new login to your account was detected. If this was not you, please reset your password immediately.\n\nBest regards,\nMicroshop Team`
+        );
+
         res.json({ accessToken });
       } else {
         const user = await User.findOne({ username: loginIdentifier });
@@ -93,6 +108,13 @@ const login = async (req, res) => {
         }
   
         const accessToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
+
+        await sendEmail(
+          user.email,
+          'New Login Detected',
+          `Hi ${user.name},\n\nA new login to your account was detected. If this was not you, please reset your password immediately.\n\nBest regards,\nMicroshop Team`
+        );
+        
         res.json({ accessToken });
       }
     } catch (error) {
@@ -140,6 +162,12 @@ const reset = async (req, res) => {
     await deleteCache(`user:${userId}`);
     await deleteCache('users');
 
+    await sendEmail(
+      user.email,
+      'Password Reset Successful',
+      `Hi ${user.name},\n\nYour password has been successfully reset. If this was not you, please contact support immediately.\n\nBest regards,\nMicroshop Team`
+    );
+    
     res.status(200).send({'password resetted successfully': user});
   } catch (error) {
     console.error(error);
@@ -204,6 +232,12 @@ const update = async (req, res) => {
 
       await deleteCache(`user:${userId}`);
       await deleteCache('users');
+
+      await sendEmail(
+        user.email,
+        'Your Account Has Been Updated',
+        `Hi ${user.name},\n\nYour account details have been successfully updated.\n\nBest regards,\nMicroshop Team`
+      );
 
       res.status(200).send({'user updated successfully': user});
   } catch (error) {
