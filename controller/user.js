@@ -14,6 +14,15 @@ const register = async (req, res) => {
         return res.status(400).send('registration details are required complete');
       }
 
+      const validateEmail = (email) => {
+        const regex = /^[^\s@]+@[^\s@]+\.(com|net|org|edu|gov|mil|biz|info|mobi|name|aero|jobs|museum|co\.[a-z]{2}|[a-z]{2})$/i;
+        return regex.test(email);
+      };
+  
+      if (!validateEmail(email)) {
+        return res.status(400).send('invalid email format');
+      }
+
       const validatePassword = (password) => {
         return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(password);
       };
@@ -63,27 +72,29 @@ const login = async (req, res) => {
       if (!loginIdentifier || !password) {
         return res.status(400).send('username or email and password are required');
       }
-  
-      const user = await User.findOne({
-        $or: [
-          { username: loginIdentifier },
-          { email: loginIdentifier }
-        ]
-      });
-      
-      if (!user || !(await bcrypt.compare(password, user.password))) {
-        return res.status(401).send('invalid username or password');
-      }
 
-      const isMatch = await bcrypt.compare(password, user.password);
-
-      if (!isMatch) {
-        console.log('password does not match');
-        return res.status(401).send('invalid username or password');
-      }
+      const validateEmail = (email) => {
+        const regex = /^[^\s@]+@[^\s@]+\.(com|net|org|edu|gov|mil|biz|info|mobi|name|aero|jobs|museum|co\.[a-z]{2}|[a-z]{2})$/i;
+        return regex.test(email);
+      };
   
-      const accessToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
-      res.json({ accessToken });
+      if (validateEmail(loginIdentifier)) {
+        const user = await User.findOne({ email: loginIdentifier });
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+          return res.status(401).send('invalid email or password');
+        }
+  
+        const accessToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
+        res.json({ accessToken });
+      } else {
+        const user = await User.findOne({ username: loginIdentifier });
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+          return res.status(401).send('invalid username or password');
+        }
+  
+        const accessToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
+        res.json({ accessToken });
+      }
     } catch (error) {
       console.error(error);
       res.status(500).send({ error: 'error logging user', details: error.message });
@@ -105,6 +116,11 @@ const update = async (req, res) => {
           return res.status(404).send('user not found');
       }
 
+      const validateEmail = (email) => {
+        const regex = /^[^\s@]+@[^\s@]+\.(com|net|org|edu|gov|mil|biz|info|mobi|name|aero|jobs|museum|co\.[a-z]{2}|[a-z]{2})$/i;
+        return regex.test(email);
+      };
+
       if (username && username !== user.username) {
         const existingUser = await User.findOne({ username }).collation({ locale: 'en', strength: 2 });
         if (existingUser) {
@@ -113,12 +129,17 @@ const update = async (req, res) => {
         user.username = username;
       }
 
-      if (email && email !== user.email) {
-        const existingEmail = await User.findOne({ email }).collation({ locale: 'en', strength: 2 });
-        if (existingEmail) {
-          return res.status(409).send('email already exists');
+      if (email) {
+        if (!validateEmail(email)) {
+          return res.status(400).send('invalid email format');
         }
-        user.email = email;
+        if (email !== user.email) {
+          const existingEmail = await User.findOne({ email }).collation({ locale: 'en', strength: 2 });
+          if (existingEmail) {
+            return res.status(409).send('email already exists');
+          }
+          user.email = email;
+        }
       }
 
       if (newPassword) {
