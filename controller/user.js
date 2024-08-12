@@ -101,13 +101,56 @@ const login = async (req, res) => {
     }
 };
 
+const reset = async (req, res) => {
+  try {
+    const { password, newPassword, confirmPassword } = req.body;
+    const userId = req.params.id;
+
+    if (!password || !newPassword || !confirmPassword) {
+      return res.status(400).send('passwords are required')
+    }
+
+    const user = await User.findByIdAndUpdate(userId);
+
+    if (!user) {
+      return res.status(404).send('user not found');
+    }
+
+    if (newPassword) {
+      const validatePassword = (password) => {
+        return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(password);
+      };
+
+      if (!validatePassword(newPassword)) {
+        return res.status(400).json({ error: `${newPassword} does not meet password requirements, it must contain at least 8 characters, including 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.` });
+      }
+
+      user.password = await bcrypt.hash(newPassword, 10);
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ error: 'passwords do not match.' });
+    }
+
+    await user.save();
+
+    await deleteCache(`user:${userId}`);
+    await deleteCache('users');
+
+    res.status(200).send({'password resetted successfully': user});
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: 'error resetting password', details: error.message });
+  }
+};
+
 const update = async (req, res) => {
   try {
       const { username, email, newPassword } = req.body;
       const userId = req.params.id;
 
       if (!username && !email && !newPassword) {
-        return res.status(400).send('at least one field (username, email, or new password) is required');
+        return res.status(400).send('at least username, email, or new password is required');
       }
 
       const user = await User.findByIdAndUpdate(userId);
@@ -210,4 +253,4 @@ const getId = async (req, res) => {
   }
 };
 
-module.exports = {register, login, update, remove, get, getId};
+module.exports = {register, login, reset, update, remove, get, getId};

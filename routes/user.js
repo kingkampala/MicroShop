@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const authenticateToken = require('../middleware/auth');
-const {register, login, update, remove, get, getId} = require('../controller/user');
+const {register, login, reset, update, remove, get, getId} = require('../controller/user');
 const { getCache, setCache, deleteCache } = require('../cache/service');
 
 router.post('/register', register);
 
 router.post('/login', login);
+
+router.patch('/:id/reset', authenticateToken, reset);
 
 router.get('/', authenticateToken, async (req, res, next) => {
     try {
