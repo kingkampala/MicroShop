@@ -287,39 +287,4 @@ const getId = async (req, res) => {
   }
 };
 
-const search = async (req, res) => {
-  try {
-    const { query } = req.query;
-    if (!query) {
-      return res.status(400).json({ message: 'search query is required' });
-    }
-
-    const searchRegex = new RegExp(query, 'i');
-    const cacheKey = `search:${query}`;
-
-    const cachedUsers = await getCache(cacheKey);
-    if (cachedUsers) {
-      return res.status(200).json({ users: cachedUsers });
-    }
-
-    const users = await User.find({
-      $or: [
-        { username: searchRegex },
-        { email: searchRegex },
-        { name: searchRegex }
-      ]
-    });
-
-    if (users && users.length > 0) {
-      await setCache(cacheKey, users);
-      return res.status(200).json({ users });
-    } else {
-      return res.status(404).json({ message: 'no users found' });
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'error searching for users', error: error.message });
-  }
-};
-
-module.exports = {register, login, reset, update, remove, get, getId, search};
+module.exports = {register, login, reset, update, remove, get, getId};

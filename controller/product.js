@@ -26,8 +26,8 @@ const getId = async (req, res) => {
 
 const upload = async (req, res) => {
   try {
-    const { name, price } = req.body;
-    const newProduct = new Product({ name, price });
+    const { name, price, description } = req.body;
+    const newProduct = new Product({ name, price, description });
     await newProduct.save();
 
     await deleteCache('products');

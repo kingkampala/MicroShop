@@ -3,9 +3,10 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 const app = express();
 
-const userRoute = require('../routes/user');
-const productRoute = require('../routes/product');
-const orderRoute = require('../routes/order');
+const userRoute = require('../route/user');
+const productRoute = require('../route/product');
+const orderRoute = require('../route/order');
+const searchRoute = require('../route/search');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
@@ -13,6 +14,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(`/user`, userRoute);
 app.use(`/product`, productRoute);
 app.use(`/order`, orderRoute);
+app.use(`/search`, searchRoute);
 
 const connectDb = () => {
     const mongoUrl = process.env.NODE_ENV === 'test' ? process.env.MONGO_URI : process.env.MONGO_URL;
