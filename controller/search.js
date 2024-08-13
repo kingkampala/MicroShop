@@ -50,9 +50,9 @@ const searchProducts = async (query) => {
     
     if (products.length > 0) {
       await setCache(cacheKey, products);
-      return { products };
+      return { data: products };
     } else {
-      return { products: [] };
+      return { message: 'no result', products: [] };
     }
   } catch (error) {
     throw new Error('error searching for products: ' + error.message);
