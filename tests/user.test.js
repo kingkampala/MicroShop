@@ -70,8 +70,8 @@ describe('User Service', () => {
       .post('/user/register')
       .send({ 
         name: 'test user', 
-        username: uniqueUsername, 
-        email: uniqueEmail, 
+        username: 'testuser',//uniqueUsername, 
+        email: 'testuser@example.com',//uniqueEmail, 
         password: 'Password123!', 
         confirmPassword: 'Password123!' 
       });

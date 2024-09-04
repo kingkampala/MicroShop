@@ -12,7 +12,7 @@ const register = async (req, res) => {
       const { name, username, email, password, confirmPassword } = req.body;
   
       if (!name || !username || !email || !password || !confirmPassword) {
-        return res.status(400).send('registration details are required complete');
+        return res.status(400).json({ error: 'registration details are required complete' });
       }
 
       const validateEmail = (email) => {
@@ -59,7 +59,7 @@ const register = async (req, res) => {
           `Hi ${newUser.name},\n\nThank you for registering with us!\n\nBest regards,\nMicroshop Team`
         );
 
-        return res.status(201).send({ 'user registered successfully': newUser });
+        return res.status(201).json({ message: 'user registered successfully', newUser });
       } catch (error) {
         if (error.code === 11000) {
           const duplicateField = Object.keys(error.keyPattern)[0];
@@ -86,23 +86,17 @@ const login = async (req, res) => {
         return regex.test(email);
       };
   
-      if (validateEmail(loginIdentifier)) {
-        const user = await User.findOne({ email: loginIdentifier });
-        if (!user || !(await bcrypt.compare(password, user.password))) {
-          return res.status(401).send('invalid email or password');
-        }
-  
-        const accessToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
+      let user;
+            if (validateEmail(loginIdentifier)) {
+                user = await User.findOne({
+                  where: { email: loginIdentifier }
+                });
+            } else {
+                user = await User.findOne({
+                  where: { username: loginIdentifier }
+                });
+            }
 
-        await sendEmail(
-          user.email,
-          'New Login Detected',
-          `Hi ${user.name},\n\nA new login to your account was detected. If this was not you, please reset your password immediately.\n\nBest regards,\nMicroshop Team`
-        );
-
-        res.json({ accessToken });
-      } else {
-        const user = await User.findOne({ username: loginIdentifier });
         if (!user || !(await bcrypt.compare(password, user.password))) {
           return res.status(401).send('invalid username or password');
         }
@@ -115,8 +109,7 @@ const login = async (req, res) => {
           `Hi ${user.name},\n\nA new login to your account was detected. If this was not you, please reset your password immediately.\n\nBest regards,\nMicroshop Team`
         );
 
-        res.json({ accessToken });
-      }
+        res.json({ message: 'user logged in', user, accessToken });
     } catch (error) {
       console.error(error);
       res.status(500).send({ error: 'error logging user', details: error.message });
