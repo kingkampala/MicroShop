@@ -5,11 +5,15 @@ const User = require('../model/user');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const Redis = require('ioredis');
+const sendEmail = require('../email/service');
 require('dotenv').config({ path: '.env.test' });
 
 const { JWT_SECRET, MONGO_URI } = process.env;
 
 jest.mock('ioredis', () => require('ioredis-mock'));
+jest.mock('../email/service', () => ({
+  sendEmail: jest.fn().mockResolvedValue(true)
+}));
 
 describe('User Service', () => {
   let server;
@@ -33,6 +37,7 @@ describe('User Service', () => {
 
     uniqueUsername = `testuser_${Date.now()}`;
     uniqueEmail = `testemail_${Date.now()}`;
+
     token = jwt.sign({ username: uniqueUsername }, JWT_SECRET, { expiresIn: '1h' });
 
     const hashedPassword = await bcrypt.hash('password123', 10);
@@ -47,6 +52,7 @@ describe('User Service', () => {
       server.close();
     }
     await redisClient.quit();
+    jest.restoreAllMocks();
   });
 
   beforeEach(async () => {
@@ -69,6 +75,8 @@ describe('User Service', () => {
         password: 'Password123!', 
         confirmPassword: 'Password123!' 
       });
+
+      console.log('Response:', res1.statusCode, res1.body);
   
     expect(res1.statusCode).toBe(201);
     expect(res1.body).toHaveProperty('user registered successfully');
@@ -238,8 +246,8 @@ describe('User Service', () => {
     const hashedPassword = await bcrypt.hash('Password123!', 10);
     const user = new User({
       _id: userId,
-      username: 'testuser',
-      email: 'testuser@example.com',
+      username: uniqueUsername,
+      email: uniqueEmail,
       password: hashedPassword,
     });
     await user.save();
@@ -258,7 +266,7 @@ describe('User Service', () => {
     expect(sendEmail).toHaveBeenCalledWith(
       user.email,
       'Password Reset Successful',
-      expect.stringContaining('Your password has been successfully reset.')
+      expect.stringContaining('your password has been successfully reset.')
     );
   
     // missing password, newPassword, or confirmPassword
@@ -322,6 +330,11 @@ describe('User Service', () => {
       .put(`/user/${user._id}`)
       .set('Authorization', `Bearer ${token}`)
       .send({ username: `updated_${uniqueUsername}`, email: `updated_${uniqueEmail}` });
+
+      if (resSuccessfulUpdate.statusCode !== 200) {
+        console.error('Update failed with status code:', resSuccessfulUpdate.statusCode);
+        console.error('Response body:', resSuccessfulUpdate.body);
+      }
   
     expect(resSuccessfulUpdate.statusCode).toBe(200);
     expect(resSuccessfulUpdate.body).toHaveProperty('user updated successfully');

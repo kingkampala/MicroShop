@@ -11,7 +11,7 @@ const register = async (req, res) => {
     try {
       const { name, username, email, password, confirmPassword } = req.body;
   
-      if (!name || !username || !email || !password | !confirmPassword) {
+      if (!name || !username || !email || !password || !confirmPassword) {
         return res.status(400).send('registration details are required complete');
       }
 
