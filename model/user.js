@@ -26,10 +26,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  confirmPassword: {
+  /*confirmPassword: {
     type: String,
     required: false,
-  },
+  },*/
   createdAt: {
     type: Date,
     default: Date.now

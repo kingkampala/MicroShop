@@ -10,6 +10,8 @@ const { JWT_SECRET } = process.env;
 const register = async (req, res) => {
     try {
       const { name, username, email, password, confirmPassword } = req.body;
+
+      console.log('registration input:', req.body);
   
       if (!name || !username || !email || !password || !confirmPassword) {
         return res.status(400).json({ error: 'registration details are required complete' });
@@ -36,15 +38,32 @@ const register = async (req, res) => {
         return res.status(400).json({ error: 'passwords do not match.' });
       }
   
+      /*console.log('checking for existing user with username:', username);
       const existingUser = await User.findOne({ username }).collation({ locale: 'en', strength: 2 });
       if (existingUser) {
+        console.log('username conflict:', existingUser.username);
         return res.status(409).send('username already exists');
       }
 
+      console.log('checking for existing user with email:', email);
       const existingEmail = await User.findOne({ email }).collation({ locale: 'en', strength: 2 });
       if (existingEmail) {
+        console.log('email conflict:', existingEmail.email);
         return res.status(409).send('email already exists');
-      }
+      }*/
+
+        const existingUser = await User.findOne({
+          $or: [{ username: new RegExp(`^${username}$`, 'i') }, { email: new RegExp(`^${email}$`, 'i') }],
+        }).collation({ locale: 'en', strength: 2 });
+    
+        if (existingUser) {
+          if (existingUser.username.toLowerCase() === username.toLowerCase()) {
+            return res.status(409).send('username already exists');
+          }
+          if (existingUser.email.toLowerCase() === email.toLowerCase()) {
+            return res.status(409).send('email already exists');
+          }
+        }
   
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = new User({ name, username, email, password: hashedPassword });

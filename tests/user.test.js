@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const Redis = require('ioredis');
 const sendEmail = require('../email/service');
+const { deleteCache } = require('../cache/service');
 require('dotenv').config({ path: '.env.test' });
 
 const { JWT_SECRET, MONGO_URI } = process.env;
@@ -20,6 +21,7 @@ describe('User Service', () => {
   let token;
   let redisClient;
   let uniqueUsername;
+  //let uniqueName;
   let uniqueEmail;
   let userId;
 
@@ -36,12 +38,13 @@ describe('User Service', () => {
     redisClient = new Redis();
 
     uniqueUsername = `testuser_${Date.now()}`;
-    uniqueEmail = `testemail_${Date.now()}`;
+    //uniqueName = `testname_${Date.now()}`;
+    uniqueEmail = `testemail_${Date.now()}@example.com`;
 
     token = jwt.sign({ username: uniqueUsername }, JWT_SECRET, { expiresIn: '1h' });
 
     const hashedPassword = await bcrypt.hash('password123', 10);
-    const user = new User({ username: uniqueUsername, email: uniqueEmail, password: hashedPassword });
+    const user = new User({ name: 'test user', username: uniqueUsername, email: uniqueEmail, password: hashedPassword });
     await user.save();
     userId = user._id.toString();
   });
@@ -56,7 +59,9 @@ describe('User Service', () => {
   });
 
   beforeEach(async () => {
-    await User.deleteMany({ username: new RegExp(`^${uniqueUsername}`) });
+    await User.deleteMany({
+      $or: [{ username: new RegExp(`^${uniqueUsername}`) }, { email: new RegExp(`^${uniqueEmail}`) }],
+    });
     await redisClient.flushall();
   });
 
@@ -66,47 +71,57 @@ describe('User Service', () => {
 
   test('should register a new user and handle validation errors', async () => {
     // register a valid new user
+    jest.spyOn(User, 'findOne').mockResolvedValueOnce(null).mockResolvedValueOnce(null);
+    jest.spyOn(bcrypt, 'hash').mockResolvedValueOnce('hashedPassword');
+    jest.spyOn(User.prototype, 'save').mockResolvedValueOnce();
+
     const res1 = await request(server)
       .post('/user/register')
       .send({ 
-        name: 'test user', 
-        username: 'testuser',//uniqueUsername, 
-        email: 'testuser@example.com',//uniqueEmail, 
+        name: 'test user',
+        username: `new_${uniqueUsername}`,
+        email: `new_${uniqueEmail}`,
         password: 'Password123!', 
         confirmPassword: 'Password123!' 
       });
 
-      console.log('Response:', res1.statusCode, res1.body);
+      //console.log('Response:', res1.statusCode, res1.body);
   
-    expect(res1.statusCode).toBe(201);
-    expect(res1.body).toHaveProperty('user registered successfully');
+    expect(res1.status).toBe(201);
+    expect(res1.body.message).toBe('user registered successfully');
+    expect(sendEmail).toHaveBeenCalledWith(
+      `new_${uniqueEmail}`,
+      'Welcome to Microshop!',
+      expect.any(String)
+    );
+    expect(deleteCache).toHaveBeenCalledWith('users');
   
     // missing fields
     const res2 = await request(server)
       .post('/user/register')
       .send({ 
         name: '', 
-        username: uniqueUsername, 
-        email: uniqueEmail, 
+        username: `new_${uniqueUsername}`,
+        email: `new_${uniqueEmail}`, 
         password: 'Password123!', 
         confirmPassword: 'Password123!' 
       });
   
-    expect(res2.statusCode).toBe(400);
-    expect(res2.text).toBe('registration details are required complete');
+    expect(res2.status).toBe(400);
+    expect(res2.body.error).toBe('registration details are required complete');
   
     // invalid email format
     const res3 = await request(server)
       .post('/user/register')
       .send({ 
         name: 'test user', 
-        username: uniqueUsername, 
+        username: `new_${uniqueUsername}`, 
         email: 'invalidEmail', 
         password: 'Password123!', 
         confirmPassword: 'Password123!' 
       });
   
-    expect(res3.statusCode).toBe(400);
+    expect(res3.status).toBe(400);
     expect(res3.text).toBe('invalid email format');
   
     // invalid password format
@@ -114,55 +129,59 @@ describe('User Service', () => {
       .post('/user/register')
       .send({ 
         name: 'test user', 
-        username: uniqueUsername, 
-        email: uniqueEmail, 
+        username: `new_${uniqueUsername}`,
+        email: `new_${uniqueEmail}`, 
         password: 'pass',
         confirmPassword: 'pass' 
       });
   
-    expect(res4.statusCode).toBe(400);
-    expect(res4.body.error).toBe('pass does not meet password requirements, it must contain at least 8 characters, including 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character.');
+    expect(res4.status).toBe(400);
+    expect(res4.body.error).toMatch(/pass does not meet password requirements, it must contain at least 8 characters, including 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character./);
   
     // password mismatch
     const res5 = await request(server)
       .post('/user/register')
       .send({ 
         name: 'test user', 
-        username: uniqueUsername, 
-        email: uniqueEmail, 
+        username: `new_${uniqueUsername}`,
+        email: `new_${uniqueEmail}`, 
         password: 'Password123!', 
         confirmPassword: 'Password1234!' 
       });
   
-    expect(res5.statusCode).toBe(400);
+    expect(res5.status).toBe(400);
     expect(res5.body.error).toBe('passwords do not match.');
   
     // duplicate username (case insensitive)
+    jest.spyOn(User, 'findOne').mockResolvedValueOnce({ username: `new_${uniqueUsername}` });
+
     const res6 = await request(server)
       .post('/user/register')
       .send({ 
         name: 'test user', 
-        username: uniqueUsername.toUpperCase(), 
-        email: `new_${uniqueEmail}`, 
+        username: `new_${uniqueUsername}`,//uniqueUsername.toUpperCase(),
+        email: `new_${uniqueEmail}`,
         password: 'Password123!', 
         confirmPassword: 'Password123!' 
       });
   
-    expect(res6.statusCode).toBe(409);
+    expect(res6.status).toBe(409);
     expect(res6.text).toBe('username already exists');
   
     // duplicate email (case insensitive)
+    jest.spyOn(User, 'findOne').mockResolvedValueOnce(null).mockResolvedValueOnce({ email: `new_${uniqueEmail}` });
+    
     const res7 = await request(server)
       .post('/user/register')
       .send({ 
         name: 'test user', 
-        username: `new_${uniqueUsername}`, 
-        email: uniqueEmail.toUpperCase(), 
+        username: `new_${uniqueUsername}`,
+        email: `new_${uniqueEmail}`,//uniqueEmail.toUpperCase(),
         password: 'Password123!', 
         confirmPassword: 'Password123!' 
       });
   
-    expect(res7.statusCode).toBe(409);
+    expect(res7.status).toBe(409);
     expect(res7.text).toBe('email already exists');
   });
 

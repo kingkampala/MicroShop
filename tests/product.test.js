@@ -60,7 +60,8 @@ describe('Product Service', () => {
   });
 
   test('should get all products', async () => {
-    const res = await request(server).get('/product');
+    const res = await request(server)
+      .get('/product');
 
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
@@ -70,7 +71,8 @@ describe('Product Service', () => {
     const product = new Product({ name: uniqueProductName, price: 100 });
     await product.save();
 
-    const res = await request(server).get(`/product/${product._id}`);
+    const res = await request(server)
+      .get(`/product/${product._id}`);
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty('name', uniqueProductName);
