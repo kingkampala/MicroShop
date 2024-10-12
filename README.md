@@ -105,7 +105,9 @@ REDIS_PASSWORD=your_redis_password
 4. **Run the Application**: Start the services individually or use Docker Compose;
 ```
 npm start
+```
 # Or run with Docker Compose
+```
 docker-compose up
 ```
 5. **Running in Kubernetes**: For production, deploy the microservices using Kubernetes. Ensure you have k8s YAML configuration files for deployment and service management.
@@ -120,27 +122,51 @@ The API is built with REST principles. Here's a sample of the key endpoints.
 
 **Authentication**
 ```
-Method	Endpoint	Description
-POST	/api/users/register	Register a new user
-POST	/api/users/login	Authenticate and get JWT token
-GET	/api/users/profile	Get authenticated user profile
+Method      Endpoint	          Description
+POST	      /user/register	    Register a new user
+POST	      /user/login	        Authenticate and get JWT token
+PATCH	      /user/:id/reset	    Reset user password (authenticated)
+GET	        /user/	            Get all users (admin only)
+GET	        /user/:id	          Get details of a specific user
+PUT	        /user/:id	          Update a user (authenticated)
+DELETE	    /user/:id	          Delete a user (admin only)
 ```
 **Product Management**
 ```
-Method	Endpoint	Description
-GET	/api/products	Get all products (with pagination)
-POST	/api/products	Create a new product (admin only)
-GET	/api/products/:id	Get details of a specific product
-PUT	/api/products/:id	Update a product (admin only)
-DELETE	/api/products/:id	Delete a product (admin only)
+Method      Endpoint	          Description
+GET	        /product	          Get all products
+POST	      /product	          Create a new product (admin only)
+GET	        /product/:id	      Get details of a specific product
+PUT	        /product/:id	      Update a product (admin only)
+DELETE	    /product/:id	      Delete a product (admin only)
 ```
 **Order Management**
 ```
-Method	Endpoint	Description
-POST	/api/orders	Create a new order
-GET	/api/orders/:id	Get details of a specific order
-PUT	/api/orders/:id/pay	Mark an order as paid (Stripe)
+Method      Endpoint            Description
+POST	      /order	            Create a new order
+GET	        /order	            Get all orders (authenticated)
+GET	        /order/:id	        Get details of a specific order
+PUT	        /order/:id	        Update order (authenticated)
+PUT	        /order/:id/stats	  Update order stats (admin only)
+PATCH	      /order/:id	        Cancel an order (authenticated)
+DELETE	    /order/:id	        Delete an order (admin only)
 ```
-[![Node.js CI](https://github.com/kingkampala/MicroShop/actions/workflows/ci.yml/badge.svg)](https://github.com/kingkampala/MicroShop/actions/workflows/ci.yml)
+**Search Functionality**
+```
+Method      Endpoint	          Description
+GET	    /search/user?query=	    Search users by query
+GET	    /search/product?query=	Search products by query
+```
+# Contribution Guidelines
+We welcome contributions to MicroShop, Explore our codebase and contribute to building a robust, scalable e-commerce solution! Here's how you can contribute:
 
-Explore our codebase and contribute to building a robust, scalable e-commerce solution!
+1. Fork the repository.
+2. Create a new feature branch (`git checkout -b feature-branch`).
+3. Commit your changes (`git commit -m 'Add feature'`).
+4. Push the branch (`git push origin feature-branch`).
+5. Open a pull request.
+
+# License
+This project is licensed under the MIT License. See the **LICENSE** file for details.
+
+[![Node.js CI](https://github.com/kingkampala/MicroShop/actions/workflows/ci.yml/badge.svg)](https://github.com/kingkampala/MicroShop/actions/workflows/ci.yml)
