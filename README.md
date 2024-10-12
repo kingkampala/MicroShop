@@ -1,4 +1,4 @@
-# MicroShop: Scalable Microservice-Based E-commerce API
+# MicroShop: Scalable E-commerce API
 MicroShop is an e-commerce platform built using a scalable microservices architecture, designed for performance optimization and enhanced security. Each microservice handles specific functionalities such as user authentication, product catalog management, order processing, and more. This project showcases best practices in Node.js backend development, microservices design, and deployment automation using Docker and Kubernetes.
 
 # Key Features
