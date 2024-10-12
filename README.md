@@ -2,31 +2,31 @@
 MicroShop is an e-commerce platform built using a scalable microservices architecture, designed for performance optimization and enhanced security. Each microservice handles specific functionalities such as user authentication, product catalog management, order processing, and more. This project showcases best practices in Node.js backend development, microservices design, and deployment automation using Docker and Kubernetes.
 
 # Key Features
-* **User Authentication & Authorization** :
+**User Authentication & Authorization** :
 
  * Secure JWT-based authentication.
  * Password hashing using bcrypt for user security.
 
-* **Product Management**:
+**Product Management**:
 
  * Full CRUD operations for products.
  * Pagination, filtering, and searching functionality.
 
-* **Order Management**:
+**Order Management**:
 
  * Order creation and tracking.
 
-* **Microservice Architecture**:
+**Microservice Architecture**:
 
  * Independent services for users, products, and orders, each with its own data store.
 
-* **API Security**:
+**API Security**:
 
  * Input validation using middleware.
  * Protection against common vulnerabilities (XSS, SQL Injection).
  * API rate limiting using Redis.
 
-* **Performance Optimization**:
+**Performance Optimization**:
 
  * Caching frequently requested data using Redis.
  * Asynchronous operations with Node.js's event-driven architecture.
