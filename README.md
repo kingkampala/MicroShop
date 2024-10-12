@@ -1,44 +1,146 @@
-# MicroShop
+# MicroShop: Scalable Microservice-Based E-commerce API
 MicroShop is an e-commerce platform built using a scalable microservices architecture, designed for performance optimization and enhanced security. Each microservice handles specific functionalities such as user authentication, product catalog management, order processing, and more. This project showcases best practices in Node.js backend development, microservices design, and deployment automation using Docker and Kubernetes.
 
-**Key Features**:
+# Key Features
+* **User Authentication & Authorization** :
 
-* Scalable microservices architecture
-* Secure communication between services with TLS/SSL
-* Performance optimization through caching and efficient database queries
-* CI/CD pipeline for automated testing and deployment
-
-**Features**
-* **User Authentication and Authorization**:
-
-  * Secure authentication using JWT tokens.
-  * Password hashing using bcrypt for user security.
-  * Role-based access control for different user privileges.
+ * Secure JWT-based authentication.
+ * Password hashing using bcrypt for user security.
 
 * **Product Management**:
 
-  * Full CRUD functionality for managing product listings.
-  * Product filtering, searching, and pagination to optimize browsing.
+ * Full CRUD operations for products.
+ * Pagination, filtering, and searching functionality.
 
 * **Order Management**:
 
-  * Seamless order creation and tracking.
-  * Integration with payment gateways (e.g., Stripe).
+ * Order creation and tracking.
 
-* **Microservices Architecture**:
+* **Microservice Architecture**:
 
-  * Independent services for user, product, and order management, facilitating easier scaling and maintenance.
+ * Independent services for users, products, and orders, each with its own data store.
 
-* **API Rate Limiting and Caching**:
+* **API Security**:
 
-  * Redis integration to handle rate-limiting and caching for optimal performance.
+ * Input validation using middleware.
+ * Protection against common vulnerabilities (XSS, SQL Injection).
+ * API rate limiting using Redis.
 
-* **Security and Best Practices**:
+* **Performance Optimization**:
 
-  * Input validation using middleware.
-  * Protection against common web vulnerabilities (e.g., XSS, SQL injection).
-  * HTTPS setup and usage of secure headers.
+ * Caching frequently requested data using Redis.
+ * Asynchronous operations with Node.js's event-driven architecture.
 
+# Tech Stack Overview
+**Core Technologies**
+* **Node.js**: JavaScript runtime for building the server-side application.
+* **Express.js**: Minimalist web framework used for building API routes and handling requests.
+* **MongoDB**: NoSQL database used for storing user, product, and order data.
+* **Redis**: In-memory data structure store used for caching, API rate limiting, and session management.
+* **Nodemailer**: Email service used for sending notifications like registration and logging notification emails.
+* **JWT (JSON Web Tokens)**: Token-based authentication for securing user sessions.
+* **Docker**: Containerization tool for running microservices independently.
+* **Kubernetes**: Container orchestration platform for managing and scaling microservices.
+* **PM2 (optional)**: Proxy for load balancing and serving the API.
+
+**DevOps & Deployment**
+* **Docker**: Used for containerizing the application to ensure consistent environments across development and production.
+* **Kubernetes**: Manages microservices in production, scaling as needed.
+* **CI/CD Pipelines**: Integration with tools like GitHub Actions for automated testing and deployments.
+
+**Testing & Quality Assurance**
+* **Jest**: Unit and integration tests to ensure the API functions as expected.
+* **Supertest**: Testing HTTP requests/responses.
+* **CI/CD Integration**: Automated testing as part of the deployment pipeline.
+
+# System Architecture
+MicroShop follows a microservice architecture, which ensures modularity, scalability, and ease of maintenance. Each service is independent, making scaling or modifying any service easier without affecting the others.
+
+**Microservices Overview**:
+* **User Service**: Manages CRUD operations for users.
+* **Product Service**: Handles CRUD operations for products, search, and filtering.
+* **Order Service**: Manages creating and processing of orders.
+* **Email Notification Service**: Sends emails using Nodemailer for user logging, user registration, etc.
+
+# Setup & Installation
+**Prerequisites**
+* **Node.js** (v14.x or later)
+* **MongoDB** (local instance or MongoDB Atlas)
+* **Redis** (local instance or cloud provider)
+* **Docker** (for running microservices)
+* **Kubernetes** (optional for production deployment)
+
+**Step-by-Step Guide**
+
+1. **Clone the Repository**:
+```
+git clone https://github.com/kingkampala/microshop.git
+cd microshop
+```
+2. **Install Dependencies**:
+```
+npm install
+```
+3. **Set Up Environment Variables**: Create a `.env` and `.env.test` file respectively in the root directory and fill it with the necessary configuration:
+```
+PORT=3000
+NODE_ENV=development
+MONGO_URL=your_main_mongo_url
+JWT_SECRET=your_jwt_secret
+REDIS_HOST=your_redis_host
+REDIS_PORT=your_redis_port
+REDIS_PASSWORD=your_redis_password
+EMAIL=your_email
+EMAIL_PASSWORD=your_email_password
+```
+```
+PORT=3000
+NODE_ENV=test
+MONGO_URI=your_test_mongo_url
+JWT_SECRET=your_jwt_secret
+REDIS_HOST=your_redis_host
+REDIS_PORT=your_redis_port
+REDIS_PASSWORD=your_redis_password
+```
+4. **Run the Application**: Start the services individually or use Docker Compose;
+```
+npm start
+# Or run with Docker Compose
+docker-compose up
+```
+5. **Running in Kubernetes**: For production, deploy the microservices using Kubernetes. Ensure you have k8s YAML configuration files for deployment and service management.
+
+6. **Testing the API**: Run unit tests for each service;
+```
+npm test
+```
+
+# API Documentation
+The API is built with REST principles. Here's a sample of the key endpoints.
+
+**Authentication**
+```
+Method	Endpoint	Description
+POST	/api/users/register	Register a new user
+POST	/api/users/login	Authenticate and get JWT token
+GET	/api/users/profile	Get authenticated user profile
+```
+**Product Management**
+```
+Method	Endpoint	Description
+GET	/api/products	Get all products (with pagination)
+POST	/api/products	Create a new product (admin only)
+GET	/api/products/:id	Get details of a specific product
+PUT	/api/products/:id	Update a product (admin only)
+DELETE	/api/products/:id	Delete a product (admin only)
+```
+**Order Management**
+```
+Method	Endpoint	Description
+POST	/api/orders	Create a new order
+GET	/api/orders/:id	Get details of a specific order
+PUT	/api/orders/:id/pay	Mark an order as paid (Stripe)
+```
 [![Node.js CI](https://github.com/kingkampala/MicroShop/actions/workflows/ci.yml/badge.svg)](https://github.com/kingkampala/MicroShop/actions/workflows/ci.yml)
 
 Explore our codebase and contribute to building a robust, scalable e-commerce solution!
