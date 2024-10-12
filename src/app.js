@@ -7,6 +7,7 @@ const userRoute = require('../route/user');
 const productRoute = require('../route/product');
 const orderRoute = require('../route/order');
 const searchRoute = require('../route/search');
+const swaggerRoute = require('../route/swagger');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
@@ -15,6 +16,7 @@ app.use(`/user`, userRoute);
 app.use(`/product`, productRoute);
 app.use(`/order`, orderRoute);
 app.use(`/search`, searchRoute);
+app.use(`/api-docs`, swaggerRoute);
 
 const connectDb = () => {
     const mongoUrl = process.env.NODE_ENV === 'test' ? process.env.MONGO_URI : process.env.MONGO_URL;
