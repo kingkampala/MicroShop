@@ -106,7 +106,7 @@ REDIS_PASSWORD=your_redis_password
 ```
 npm start
 ```
-# Or run with Docker Compose
+*Or run with Docker Compose*
 ```
 docker-compose up
 ```
