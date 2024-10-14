@@ -121,8 +121,7 @@ npm test
 # API Documentation
 The API is documented using Swagger. You can access the interactive Swagger UI by visiting the following link:
 
-* **Production Swagger UI**: https://microshop.onrender.com/api-docs
-* **Development Swagger UI**: http://localhost:2810/api-docs
+* **Swagger UI**: https://microshop.onrender.com/api-docs
 
 This documentation includes details of all API endpoints, request parameters, response formats, and error messages.
 
