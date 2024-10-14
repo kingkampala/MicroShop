@@ -29,7 +29,8 @@ const connectDb = () => {
     return mongoose
         .connect(mongoUrl, {
             dbName: process.env.NODE_ENV === 'test' ? 'microshop' : 'microshop-main',
-            bufferCommands: true
+            bufferCommands: true,
+            connectTimeoutMS: 30000
         })
         .then(() => {
             console.log(`connected to ${process.env.NODE_ENV === 'test' ? 'test' : 'development'} database`);

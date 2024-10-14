@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
-const { JWT_SECRET } = process.env;
+require('dotenv').config();
+//const { JWT_SECRET } = process.env;
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
@@ -9,9 +10,9 @@ function authenticateToken(req, res, next) {
     return res.status(401).send('access denied. no token provided.');
   }
   
-  jwt.verify(token, JWT_SECRET, (err, user) => {
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) {
-      return res.sendStatus(403);
+      return res.status(403).send('invalid or expired token.');
     }
     req.user = user;
     next();

@@ -5,7 +5,7 @@ const sendEmail = require('../email/service');
 const { deleteCache } = require('../cache/service');
 require('dotenv').config();
 
-const { JWT_SECRET } = process.env;
+//const { JWT_SECRET } = process.env;
 
 const register = async (req, res) => {
     try {
@@ -107,20 +107,29 @@ const login = async (req, res) => {
   
       let user;
             if (validateEmail(loginIdentifier)) {
-                user = await User.findOne({
-                  where: { email: loginIdentifier }
-                });
+                user = await User.findOne({ email: loginIdentifier });
             } else {
-                user = await User.findOne({
-                  where: { username: loginIdentifier }
-                });
+                user = await User.findOne({ username: loginIdentifier });
             }
 
-        if (!user || !(await bcrypt.compare(password, user.password))) {
-          return res.status(401).send('invalid username or password');
+        /*if (!user || !(await bcrypt.compare(password, user.password))) {
+          return res.status(401).send('incorrect password');
+        }*/
+
+        if (!user) {
+          return res.status(401).send('User not found'); // More informative message
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            console.error('Password comparison failed', {
+                enteredPassword: password,
+                storedHash: user.password
+            });
+            return res.status(401).send('Incorrect password');
         }
   
-        const accessToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
+        const accessToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
         await sendEmail(
           user.email,

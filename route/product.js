@@ -23,6 +23,16 @@ const { getCache, setCache, deleteCache } = require('../cache/service');
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/Product'
+ *           examples:
+ *             example1:
+ *               summary: A successful product upload
+ *               value: {
+ *                 "name": "Mercedes GLK350 2015",
+ *                 "price": 14999.99,
+ *                 "description": "GLK350 New Model"
+ *               }
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       201:
  *         description: Product successfully uploaded
@@ -71,6 +81,7 @@ router.get('/', async (req, res, next) => {
  *         required: true
  *         schema:
  *           type: string
+ *           example: "214c468e-2b0c-442f-8dac-dcff87a2d9b9"
  *     responses:
  *       200:
  *         description: Product details
@@ -108,12 +119,27 @@ router.get('/:id', async (req, res, next) => {
  *         required: true
  *         schema:
  *           type: string
+ *           example: "214c468e-2b0c-442f-8dac-dcff87a2d9b9"
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Product'
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: "new name"
+ *                 example: "Iphone 16 pro max 1TB"
+ *               newPrice:
+ *                 type: number
+ *                 description: "new price"
+ *                 example: 1999.99
+ *           required:
+ *             - name
+ *             - newPrice
  *     responses:
  *       200:
  *         description: Product details successfully updated
@@ -138,6 +164,7 @@ router.put('/:id', authenticateToken, update);
  *         required: true
  *         schema:
  *           type: string
+ *           example: "214c468e-2b0c-442f-8dac-dcff87a2d9b9"
  *     responses:
  *       200:
  *         description: Product successfully deleted

@@ -11,7 +11,7 @@ const { searchUsers, searchProducts } = require('../controller/search');
 
 /**
  * @swagger
- * /search/users:
+ * /search/user:
  *   get:
  *     summary: Search users
  *     tags: [Search]
@@ -21,6 +21,7 @@ const { searchUsers, searchProducts } = require('../controller/search');
  *         required: true
  *         schema:
  *           type: string
+ *           example: "kampala"
  *     responses:
  *       200:
  *         description: List of matching users
@@ -43,7 +44,7 @@ router.get('/user', async (req, res) => {
 
 /**
  * @swagger
- * /search/products:
+ * /search/product:
  *   get:
  *     summary: Search products
  *     tags: [Search]
@@ -53,6 +54,7 @@ router.get('/user', async (req, res) => {
  *         required: true
  *         schema:
  *           type: string
+ *           example: "iphone"
  *     responses:
  *       200:
  *         description: List of matching products

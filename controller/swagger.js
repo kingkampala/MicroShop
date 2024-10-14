@@ -43,6 +43,13 @@ const swaggerOptions = {
                   createdAt: { type: 'string', format: 'date-time', description: 'Order creation date' }
                 }
               }
+            },
+            securitySchemes: {
+                bearerAuth: {
+                    type: "http",
+                    scheme: "bearer",
+                    bearerFormat: "JWT"
+                }
             }
         }
     },

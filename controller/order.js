@@ -6,7 +6,11 @@ const makeOrder = async (req, res) => {
   try {
     const { productId, quantity } = req.body;
 
-    const userId = req.user._id;
+    const userId = req.user.userId;
+
+    if (!userId) {
+      return res.status(400).json({ error: 'user ID is missing or invalid' });
+    }
 
     const product = await Product.findById(productId);
     if (!product) {
@@ -28,7 +32,7 @@ const makeOrder = async (req, res) => {
 const getId = async (req, res) => {
   try {
     const orderId = req.params.id;
-    const userId = req.user._id;
+    const userId = req.user.userId;
 
     const order = await Order.findOne({ _id: orderId, userId });
 
@@ -45,7 +49,7 @@ const getId = async (req, res) => {
 
 const get = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user.userId;
 
     const orders = await Order.find({ userId });
     res.status(200).json(orders);
@@ -60,7 +64,7 @@ const updateOrder = async (req, res) => {
       const orderId = req.params.id;
       const { productId, quantity } = req.body;
   
-      const userId = req.user._id;
+      const userId = req.user.userId;
   
       const productExists = await Product.exists({ _id: productId });
       if (!productExists) {
@@ -91,7 +95,7 @@ const updateStats = async (req, res) => {
   try {
     const orderId = req.params.id;
     const { status } = req.body;
-    const userId = req.user._id;
+    const userId = req.user.userId;
 
     const order = await Order.findOneAndUpdate(
       { _id: orderId, userId },
@@ -119,7 +123,7 @@ const updateStats = async (req, res) => {
 const cancel = async (req, res) => {
     try {
       const orderId = req.params.id;
-      const userId = req.user._id;
+      const userId = req.user.userId;
   
       const order = await Order.findOneAndUpdate(
         { _id: orderId, userId, status: 'pending' },
@@ -141,7 +145,7 @@ const cancel = async (req, res) => {
 const remove = async (req, res) => {
   try {
     const orderId = req.params.id;
-    const userId = req.user._id;
+    const userId = req.user.userId;
 
     const order = await Order.findOneAndDelete({ _id: orderId, userId });
 

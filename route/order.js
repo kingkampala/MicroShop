@@ -23,6 +23,15 @@ const { getCache, setCache, deleteCache } = require('../cache/service');
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/Order'
+ *           examples:
+ *             example1:
+ *               summary: Order placed successfully
+ *               value: {
+ *                 "productId": "214c468e-2b0c-442f-8dac-dcff87a2d9b9",
+ *                 "quantity": 600
+ *               }
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       201:
  *         description: Order successfully created
@@ -44,6 +53,8 @@ router.post('/', authenticateToken, makeOrder);
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Order'
+ *     security:
+ *       - bearerAuth: []
  */
 router.get('/', authenticateToken, async (req, res, next) => {
   try {
@@ -71,6 +82,9 @@ router.get('/', authenticateToken, async (req, res, next) => {
  *         required: true
  *         schema:
  *           type: string
+ *         example: "ae5aae79-8161-49e8-b729-988ba52573b3"
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Order details
@@ -108,12 +122,27 @@ router.get('/:id', authenticateToken, async (req, res, next) => {
  *         required: true
  *         schema:
  *           type: string
+ *         example: "ae5aae79-8161-49e8-b729-988ba52573b3"
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Order'
+ *             type: object
+ *             properties:
+ *               productId:
+ *                 type: string
+ *                 description: "product id"
+ *                 example: "214c468e-2b0c-442f-8dac-dcff87a2d9b9"
+ *               quantity:
+ *                 type: number
+ *                 description: "new quantity"
+ *                 example: 6000
+ *           required:
+ *             - name
+ *             - newPrice
  *     responses:
  *       200:
  *         description: Order details successfully updated
@@ -138,6 +167,9 @@ router.put('/:id/', authenticateToken, updateOrder);
  *         required: true
  *         schema:
  *           type: string
+ *         example: "ae5aae79-8161-49e8-b729-988ba52573b3"
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -147,11 +179,8 @@ router.put('/:id/', authenticateToken, updateOrder);
  *             properties:
  *               status:
  *                 type: string
- *                 description: The new status of the order
- *               shippedDate:
- *                 type: string
- *                 format: date-time
- *                 description: The date when the order was shipped
+ *                 description: "order new status"
+ *                 example: "processing"
  *     responses:
  *       200:
  *         description: Order statistics successfully updated
@@ -176,16 +205,9 @@ router.put('/:id/stats', authenticateToken, updateStats);
  *         required: true
  *         schema:
  *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               reason:
- *                 type: string
- *                 description: Reason for cancellation
+ *           example: "ae5aae79-8161-49e8-b729-988ba52573b3"
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Order successfully canceled
@@ -208,6 +230,7 @@ router.patch('/:id', authenticateToken, cancel);
  *         required: true
  *         schema:
  *           type: string
+ *         example: "ae5aae79-8161-49e8-b729-988ba52573b3"
  *     responses:
  *       200:
  *         description: Order successfully deleted
