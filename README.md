@@ -42,6 +42,7 @@ MicroShop is an e-commerce platform built using a scalable microservices archite
 * **Docker**: Containerization tool for running microservices independently.
 * **Kubernetes**: Container orchestration platform for managing and scaling microservices.
 * **PM2 (optional)**: Proxy for load balancing and serving the API.
+* **Swagger**: Used for API documentation to provide a comprehensive and interactive API reference for developers.
 
 **DevOps & Deployment**
 * **Docker**: Used for containerizing the application to ensure consistent environments across development and production.
@@ -118,45 +119,13 @@ npm test
 ```
 
 # API Documentation
-The API is built with REST principles. Here's a sample of the key endpoints.
+The API is documented using Swagger. You can access the interactive Swagger UI by visiting the following link:
 
-**Authentication**
-```
-Method      Endpoint	          Description
-POST	      /user/register	    Register a new user
-POST	      /user/login	        Authenticate and get JWT token
-PATCH	      /user/:id/reset	    Reset user password (authenticated)
-GET	        /user/	            Get all users (admin only)
-GET	        /user/:id	          Get details of a specific user
-PUT	        /user/:id	          Update a user (authenticated)
-DELETE	    /user/:id	          Delete a user (admin only)
-```
-**Product Management**
-```
-Method      Endpoint	          Description
-GET	        /product	          Get all products
-POST	      /product	          Create a new product (admin only)
-GET	        /product/:id	      Get details of a specific product
-PUT	        /product/:id	      Update a product (admin only)
-DELETE	    /product/:id	      Delete a product (admin only)
-```
-**Order Management**
-```
-Method      Endpoint            Description
-POST	      /order	            Create a new order
-GET	        /order	            Get all orders (authenticated)
-GET	        /order/:id	        Get details of a specific order
-PUT	        /order/:id	        Update order (authenticated)
-PUT	        /order/:id/stats	  Update order stats (admin only)
-PATCH	      /order/:id	        Cancel an order (authenticated)
-DELETE	    /order/:id	        Delete an order (admin only)
-```
-**Search Functionality**
-```
-Method      Endpoint	          Description
-GET	    /search/user?query=	    Search users by query
-GET	    /search/product?query=	Search products by query
-```
+* **Production Swagger UI**: https://microshop.onrender.com/api-docs
+* **Development Swagger UI**: http://localhost:2810/api-docs
+
+This documentation includes details of all API endpoints, request parameters, response formats, and error messages.
+
 # Contribution Guidelines
 We welcome contributions to MicroShop, Explore our codebase and contribute to building a robust, scalable e-commerce solution! Here's how you can contribute:
 
