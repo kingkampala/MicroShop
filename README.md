@@ -118,6 +118,13 @@ docker-compose up
 npm test
 ```
 
+# Base URL
+Microshop API backend is hosted at:
+
+https://microshop.onrender.com
+
+This is the base URL for the Microshop API, which is intended to be accessed by the application's frontend.
+
 # API Documentation
 The API is documented using Swagger. You can access the interactive Swagger UI by visiting the following link:
 
